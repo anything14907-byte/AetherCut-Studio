@@ -1,11 +1,12 @@
 /**
- * Studio Context & State Manager
- * Centralized state for Timeline, Canvas Engine, Tracks, History, and AI Mutations.
+ * Studio Context & State Manager — Final Cut Pro Studio Edition (v2.0)
+ * Magnetic Timeline, Live Skimming, Resizable Panes, Workspace Modes,
+ * 3-Way Color Wheels, Audio Meters, Connected Storyline Stems & Audition Stacks.
  */
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { DEFAULT_DEMO_PROJECT } from '../config/defaultProject';
-import { TRACK_CONFIGS } from '../types/studioTypes';
+import { TRACK_CONFIGS, AUDIO_EQ_PRESETS } from '../types/studioTypes';
 import { projectStorage } from '../services/projectStorage';
 import { audioEngine } from '../services/audioEngine';
 import { aiDirectorEngine } from '../services/aiDirectorEngine';
@@ -15,7 +16,7 @@ import { renderCompositorFrame } from '../services/canvasRenderer';
 const StudioContext = createContext(null);
 
 export function StudioProvider({ children }) {
-  // Check URL query parameters: e.g. ?v=demo or ?v=space or ?v=studio
+  // Query parameters: e.g. ?v=demo or ?v=space or ?v=shorts
   const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const initialVParam = urlParams ? urlParams.get('v') : null;
 
@@ -30,16 +31,39 @@ export function StudioProvider({ children }) {
     return saved || DEFAULT_DEMO_PROJECT;
   });
 
-  const [activeView, setActiveView] = useState(() => {
-    // If ?v= query param is provided, open Studio directly!
-    return initialVParam ? 'studio' : 'landing';
-  });
+  const [activeView, setActiveView] = useState(() => (initialVParam ? 'studio' : 'landing'));
   const [currentTime, setCurrentTimeState] = useState(0.0);
   const [isPlaying, setIsPlayingState] = useState(false);
   const [selectedClipId, setSelectedClipId] = useState(null);
   const [zoom, setZoom] = useState(45); // px per second
   const [tracks, setTracks] = useState(TRACK_CONFIGS);
-  
+
+  // --- FINAL CUT PRO 2.0 WORKSPACE ERGONOMICS ---
+  const [workspaceMode, setWorkspaceMode] = useState('edit'); // 'edit' | 'color' | 'audio' | 'ai'
+  const [showBrowser, setShowBrowser] = useState(true);
+  const [showInspector, setShowInspector] = useState(true);
+  const [showScopes, setShowScopes] = useState(false);
+  const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
+
+  // Resizable Panes Dimensions
+  const [leftDockWidth, setLeftDockWidth] = useState(280);
+  const [rightInspectorWidth, setRightInspectorWidth] = useState(340);
+  const [timelineHeight, setTimelineHeight] = useState(240);
+
+  // Editing Tools & Magnetic Timeline
+  const [activeTool, setActiveTool] = useState('select'); // 'select' | 'blade'
+  const [isMagnetic, setIsMagnetic] = useState(true);
+  const [isSkimmingEnabled, setIsSkimmingEnabled] = useState(true);
+  const [skimmerTime, setSkimmerTime] = useState(null);
+
+  // Live Stereo dBFS Meter State
+  const [stereoDb, setStereoDb] = useState({ leftDb: -60, rightDb: -60, leftPeak: -60, rightPeak: -60 });
+
+  // Pro Audio Suite State
+  const [voiceIsolation, setVoiceIsolationState] = useState(false);
+  const [autoDuck, setAutoDuckState] = useState(true);
+  const [currentEqPreset, setCurrentEqPreset] = useState('flat');
+
   // Modals & UI States
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [exportProgress, setExportProgress] = useState(null);
@@ -50,8 +74,8 @@ export function StudioProvider({ children }) {
   // Undo / Redo History Stack
   const [history, setHistory] = useState({ past: [], future: [] });
 
-  // Playback animation frame ref
   const animFrameRef = useRef(null);
+  const meterIntervalRef = useRef(null);
   const lastPlayTimeRef = useRef(null);
   const projectRef = useRef(project);
   projectRef.current = project;
@@ -75,7 +99,7 @@ export function StudioProvider({ children }) {
       const next = typeof newProjectOrFn === 'function' ? newProjectOrFn(prev) : newProjectOrFn;
       if (recordHistory) {
         setHistory((h) => ({
-          past: [...h.past.slice(-20), prev],
+          past: [...h.past.slice(-25), prev],
           future: []
         }));
       }
@@ -116,7 +140,6 @@ export function StudioProvider({ children }) {
   const setCurrentTime = useCallback((time) => {
     const clamped = Math.max(0, Math.min(projectRef.current.duration, time));
     setCurrentTimeState(clamped);
-    // sync audio engine
     audioEngine.syncTimeline(clamped, false, projectRef.current.clips);
   }, []);
 
@@ -130,6 +153,7 @@ export function StudioProvider({ children }) {
         cancelAnimationFrame(animFrameRef.current);
         animFrameRef.current = null;
       }
+      setStereoDb({ leftDb: -60, rightDb: -60, leftPeak: -60, rightPeak: -60 });
     } else {
       lastPlayTimeRef.current = performance.now();
     }
@@ -142,6 +166,7 @@ export function StudioProvider({ children }) {
       if (!next) {
         audioEngine.stopAll();
         if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+        setStereoDb({ leftDb: -60, rightDb: -60, leftPeak: -60, rightPeak: -60 });
       } else {
         lastPlayTimeRef.current = performance.now();
       }
@@ -149,7 +174,7 @@ export function StudioProvider({ children }) {
     });
   }, []);
 
-  // Frame stepper (e.g. Left/Right arrow keys)
+  // Frame stepper (-1 / +1 frame, e.g. Left/Right Arrow or Rotary Jog Wheel)
   const stepFrame = useCallback((deltaFrames = 1) => {
     setIsPlaying(false);
     const fps = projectRef.current.fps || 30;
@@ -175,6 +200,9 @@ export function StudioProvider({ children }) {
         return newTime;
       });
 
+      // Update Stereo dBFS Meter
+      setStereoDb(audioEngine.getStereoDbLevels(true));
+
       animFrameRef.current = requestAnimationFrame(tick);
     };
 
@@ -185,7 +213,7 @@ export function StudioProvider({ children }) {
     };
   }, [isPlaying]);
 
-  // --- CLIP MUTATION ACTIONS ---
+  // --- FINAL CUT PRO MAGNETIC TIMELINE & CONNECTED STEM MUTATIONS ---
 
   const addClip = useCallback((clip) => {
     setProject((prev) => ({
@@ -197,23 +225,76 @@ export function StudioProvider({ children }) {
   }, [setProject, showToast]);
 
   const updateClip = useCallback((clipId, patch) => {
-    setProject((prev) => ({
-      ...prev,
-      clips: prev.clips.map((c) => (c.id === clipId ? { ...c, ...patch } : c))
-    }));
+    setProject((prev) => {
+      const targetClip = prev.clips.find(c => c.id === clipId);
+      if (!targetClip) return prev;
+
+      // Connected Storyline: if V2 clip is moving, also shift connected T1/A1 stems!
+      let deltaXSec = 0;
+      if (patch.startTime !== undefined && targetClip.trackId === 'V2') {
+        deltaXSec = patch.startTime - targetClip.startTime;
+      }
+
+      return {
+        ...prev,
+        clips: prev.clips.map((c) => {
+          if (c.id === clipId) {
+            return { ...c, ...patch };
+          }
+          // Shift connected children
+          if (deltaXSec !== 0 && c.parentClipId === clipId) {
+            return {
+              ...c,
+              startTime: Math.max(0, Math.round((c.startTime + deltaXSec) * 100) / 100)
+            };
+          }
+          return c;
+        })
+      };
+    });
   }, [setProject]);
 
+  // Delete clip with Magnetic Ripple on Primary Storyline (V2)
   const deleteClip = useCallback((clipId) => {
     const targetId = clipId || selectedClipId;
     if (!targetId) return;
 
-    setProject((prev) => ({
-      ...prev,
-      clips: prev.clips.filter((c) => c.id !== targetId)
-    }));
+    setProject((prev) => {
+      const target = prev.clips.find(c => c.id === targetId);
+      if (!target) return prev;
+
+      let remaining = prev.clips.filter((c) => c.id !== targetId);
+
+      // Final Cut Magnetic Ripple: Close gap on Primary Storyline V2
+      if (isMagnetic && target.trackId === 'V2') {
+        const gap = target.duration;
+        remaining = remaining.map((c) => {
+          if (c.trackId === 'V2' && c.startTime > target.startTime) {
+            return {
+              ...c,
+              startTime: Math.max(0, Math.round((c.startTime - gap) * 100) / 100)
+            };
+          }
+          // Also ripple tethered stems
+          if (c.startTime > target.startTime && c.parentClipId) {
+            return {
+              ...c,
+              startTime: Math.max(0, Math.round((c.startTime - gap) * 100) / 100)
+            };
+          }
+          return c;
+        });
+      }
+
+      return {
+        ...prev,
+        clips: remaining
+      };
+    });
+
     if (selectedClipId === targetId) setSelectedClipId(null);
-    showToast('Clip deleted');
-  }, [selectedClipId, setProject, showToast]);
+    showToast(isMagnetic ? 'Ripple Deleted clip (Magnetic Snap active)' : 'Clip deleted');
+  }, [selectedClipId, isMagnetic, setProject, showToast]);
 
   const duplicateClip = useCallback((clipId) => {
     const targetId = clipId || selectedClipId;
@@ -237,19 +318,20 @@ export function StudioProvider({ children }) {
     showToast(`Duplicated clip: ${newClip.name}`);
   }, [selectedClipId, project.clips, setProject, showToast]);
 
-  const splitClipAtPlayhead = useCallback((clipId, splitTime = currentTime) => {
+  // Blade Cut at Playhead or Skimmer Point
+  const splitClipAtPlayhead = useCallback((clipId, splitTime = (skimmerTime ?? currentTime)) => {
     const targetId = clipId || selectedClipId;
     const clip = targetId
       ? project.clips.find((c) => c.id === targetId)
       : project.clips.find((c) => c.startTime < splitTime && (c.startTime + c.duration) > splitTime);
 
     if (!clip) {
-      showToast('No clip found at playhead to split');
+      showToast('No clip found at split location');
       return;
     }
 
     if (splitTime <= clip.startTime || splitTime >= (clip.startTime + clip.duration)) {
-      showToast('Split point must be strictly within clip duration');
+      showToast('Split point must be strictly within clip bounds');
       return;
     }
 
@@ -258,7 +340,7 @@ export function StudioProvider({ children }) {
 
     const firstClip = {
       ...JSON.parse(JSON.stringify(clip)),
-      duration: firstDuration,
+      duration: Math.round(firstDuration * 100) / 100,
       trimEnd: clip.trimStart + firstDuration
     };
 
@@ -266,8 +348,8 @@ export function StudioProvider({ children }) {
       ...JSON.parse(JSON.stringify(clip)),
       id: `${clip.trackId.toLowerCase()}-split-${Date.now()}`,
       name: `${clip.name} (Part 2)`,
-      startTime: splitTime,
-      duration: secondDuration,
+      startTime: Math.round(splitTime * 100) / 100,
+      duration: Math.round(secondDuration * 100) / 100,
       trimStart: clip.trimStart + firstDuration
     };
 
@@ -276,8 +358,55 @@ export function StudioProvider({ children }) {
       clips: prev.clips.map((c) => (c.id === clip.id ? firstClip : c)).concat(secondClip)
     }));
     setSelectedClipId(secondClip.id);
-    showToast(`Split clip "${clip.name}" into two`);
-  }, [currentTime, selectedClipId, project.clips, setProject, showToast]);
+    showToast(`Bladed clip "${clip.name}" at ${splitTime.toFixed(2)}s`);
+  }, [currentTime, skimmerTime, selectedClipId, project.clips, setProject, showToast]);
+
+  // Cycle Clip Audition (1/3 Stack Badge)
+  const cycleClipAudition = useCallback((clipId) => {
+    const clip = project.clips.find(c => c.id === clipId);
+    if (!clip || !clip.auditions || clip.auditions.length <= 1) return;
+
+    const nextIndex = ((clip.activeAuditionIndex || 0) + 1) % clip.auditions.length;
+    const newTake = clip.auditions[nextIndex];
+
+    updateClip(clipId, {
+      activeAuditionIndex: nextIndex,
+      name: newTake.name || clip.name,
+      sceneType: newTake.sceneType || clip.sceneType,
+      colorFilter: {
+        ...(clip.colorFilter || {}),
+        lutPreset: newTake.lutPreset || clip.colorFilter?.lutPreset || 'none'
+      }
+    });
+
+    showToast(`Switched to Audition Take ${nextIndex + 1}/${clip.auditions.length}`);
+  }, [project.clips, updateClip, showToast]);
+
+  // Pro Audio Methods
+  const toggleVoiceIsolation = useCallback(() => {
+    setVoiceIsolationState((prev) => {
+      const next = !prev;
+      audioEngine.setVoiceIsolation(next);
+      showToast(next ? 'Voice Isolation: Active (Vocal frequencies enhanced)' : 'Voice Isolation: Off');
+      return next;
+    });
+  }, [showToast]);
+
+  const toggleAutoDuck = useCallback(() => {
+    setAutoDuckState((prev) => {
+      const next = !prev;
+      audioEngine.setAutoDuck(next);
+      showToast(next ? 'Auto-Duck Music: Enabled (-14dB under voiceover)' : 'Auto-Duck Music: Disabled');
+      return next;
+    });
+  }, [showToast]);
+
+  const setEqPreset = useCallback((presetId) => {
+    const preset = AUDIO_EQ_PRESETS.find(p => p.id === presetId) || AUDIO_EQ_PRESETS[0];
+    setCurrentEqPreset(presetId);
+    audioEngine.setEqPreset(preset);
+    showToast(`Applied Audio EQ: ${preset.name}`);
+  }, [showToast]);
 
   // Set Aspect Ratio
   const setAspectRatio = useCallback((ratio) => {
@@ -300,7 +429,7 @@ export function StudioProvider({ children }) {
     showToast(`Aspect ratio set to ${ratio}`);
   }, [setProject, showToast]);
 
-  // Execute AI Natural Language Command
+  // Execute AI Command
   const executeAiCommand = useCallback(async (commandText) => {
     try {
       const res = await aiDirectorEngine.processCommand(commandText, {
@@ -314,7 +443,6 @@ export function StudioProvider({ children }) {
       } else if (res.type === 'ADD_CLIP') {
         addClip(res.clip);
       } else if (res.type === 'APPLY_COLOR_GRADE') {
-        // apply lut to visual clips
         setProject((prev) => ({
           ...prev,
           clips: prev.clips.map((c) =>
@@ -350,7 +478,7 @@ export function StudioProvider({ children }) {
   // Project Import / Export
   const exportProjectJson = useCallback(() => {
     projectStorage.exportProjectFile(project);
-    showToast('Exported project file (.aether.json)');
+    showToast('Exported Final Cut project file (.aether.json)');
   }, [project, showToast]);
 
   const importProjectJson = useCallback(async (file) => {
@@ -380,7 +508,7 @@ export function StudioProvider({ children }) {
           setExportProgress(progress);
         }
       );
-      showToast('🎉 Video rendered & downloaded successfully with ZERO watermarks!');
+      showToast('🎉 Video rendered & downloaded with zero watermarks!');
     } catch (err) {
       if (err.message !== 'Export cancelled by user.') {
         console.error('Export failed:', err);
@@ -396,20 +524,49 @@ export function StudioProvider({ children }) {
     showToast('Export cancelled');
   }, [showToast]);
 
-  // Keyboard shortcut listener
+  // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore if user is typing in input or textarea
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      // Spotlight Command HUD (Cmd+K or Ctrl+K)
+      if ((e.metaKey || e.ctrlKey) && e.code === 'KeyK') {
+        e.preventDefault();
+        setIsSpotlightOpen((prev) => !prev);
         return;
       }
 
       if (e.code === 'Space') {
         e.preventDefault();
         togglePlay();
-      } else if (e.code === 'KeyS' && !e.metaKey && !e.ctrlKey) {
+      } else if (e.code === 'KeyB') {
+        // Blade Tool
         e.preventDefault();
-        splitClipAtPlayhead();
+        setActiveTool('blade');
+        showToast('Blade Tool Active (B)');
+      } else if (e.code === 'KeyA') {
+        // Select Tool
+        e.preventDefault();
+        setActiveTool('select');
+        showToast('Select Tool Active (A)');
+      } else if (e.code === 'KeyS' && !e.metaKey && !e.ctrlKey) {
+        // Toggle Skimmer
+        e.preventDefault();
+        setIsSkimmingEnabled((prev) => {
+          const next = !prev;
+          showToast(next ? 'Live Skimming: ON (S)' : 'Live Skimming: OFF (S)');
+          return next;
+        });
+      } else if (e.code === 'KeyM') {
+        // Toggle Magnetic Timeline
+        e.preventDefault();
+        setIsMagnetic((prev) => {
+          const next = !prev;
+          showToast(next ? 'Magnetic Timeline: Enabled (M)' : 'Magnetic Timeline: Disabled (M)');
+          return next;
+        });
       } else if (e.code === 'KeyD' && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         duplicateClip();
@@ -434,14 +591,14 @@ export function StudioProvider({ children }) {
         setIsShortcutsModalOpen((prev) => !prev);
       } else if (e.code === 'Escape') {
         setSelectedClipId(null);
+        setIsSpotlightOpen(false);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [togglePlay, splitClipAtPlayhead, duplicateClip, deleteClip, stepFrame, undo, redo]);
+  }, [togglePlay, duplicateClip, deleteClip, stepFrame, undo, redo, showToast]);
 
-  // Selected clip object helper
   const selectedClip = project.clips.find((c) => c.id === selectedClipId) || null;
 
   const value = {
@@ -463,6 +620,7 @@ export function StudioProvider({ children }) {
     deleteClip,
     duplicateClip,
     splitClipAtPlayhead,
+    cycleClipAudition,
     zoom,
     setZoom,
     setAspectRatio,
@@ -483,7 +641,39 @@ export function StudioProvider({ children }) {
     isApiKeyModalOpen,
     setIsApiKeyModalOpen,
     toastMessage,
-    showToast
+    showToast,
+    // Final Cut Pro 2.0 Ergonomics
+    workspaceMode,
+    setWorkspaceMode,
+    showBrowser,
+    setShowBrowser,
+    showInspector,
+    setShowInspector,
+    showScopes,
+    setShowScopes,
+    isSpotlightOpen,
+    setIsSpotlightOpen,
+    leftDockWidth,
+    setLeftDockWidth,
+    rightInspectorWidth,
+    setRightInspectorWidth,
+    timelineHeight,
+    setTimelineHeight,
+    activeTool,
+    setActiveTool,
+    isMagnetic,
+    setIsMagnetic,
+    isSkimmingEnabled,
+    setIsSkimmingEnabled,
+    skimmerTime,
+    setSkimmerTime,
+    stereoDb,
+    voiceIsolation,
+    toggleVoiceIsolation,
+    autoDuck,
+    toggleAutoDuck,
+    currentEqPreset,
+    setEqPreset
   };
 
   return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;
@@ -496,4 +686,3 @@ export function useStudio() {
   }
   return context;
 }
-

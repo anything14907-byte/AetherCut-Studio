@@ -1,57 +1,65 @@
 /**
- * Studio Types and Data Schemas
+ * Studio Types and Data Schemas (Final Cut Pro Studio Edition)
  */
 
 export const TRACK_CONFIGS = [
   {
     id: "T1",
-    name: "Text & Captions",
+    name: "Titles & Captions",
     type: "text",
-    color: "#8A2BE2",
+    color: "#BF5AF2", // Apple Pro Violet
     badge: "T1",
-    description: "Animated Titles, Kinetic Subtitles & Lower Thirds",
+    description: "Kinetic Captions, Lower Thirds & 3D Titles",
     muted: false,
     locked: false,
   },
   {
     id: "V1",
-    name: "Overlay / PIP Media",
+    name: "Connected B-Roll / PIP",
     type: "overlay",
-    color: "#00F2FE",
+    color: "#64D2FF", // Apple Pro Light Blue
     badge: "V1",
-    description: "Picture-in-Picture, Stickers, HUD & B-Roll Overlays",
+    description: "Cutaways, Overlays, Motion Graphics & Stickers",
     muted: false,
     locked: false,
   },
   {
     id: "V2",
-    name: "Main Video / Scene",
+    name: "Primary Storyline",
     type: "video",
-    color: "#3B82F6",
+    color: "#0A84FF", // Apple Pro Deep Blue
     badge: "V2",
-    description: "Base Video Clips, Background Visuals & Camera Angles",
+    description: "Magnetic Primary Storyline & Base Camera Visuals",
     muted: false,
     locked: false,
   },
   {
     id: "A1",
-    name: "Voiceover & Audio",
+    name: "Audio & Music",
     type: "audio",
-    color: "#10B981",
+    color: "#30D158", // Apple Pro Green
     badge: "A1",
-    description: "AI Voiceover, Cinematic BGM & Sound FX",
+    description: "Voiceover, Synths, Sound FX & Auto-Ducking Music",
     muted: false,
     locked: false,
   },
 ];
 
 export const LUT_PRESETS = [
-  { id: 'none', label: 'Original / Neutral', filter: '' },
+  { id: 'none', label: 'Rec.709 Natural', filter: '' },
+  { id: 'tealOrange', label: 'Hollywood Teal & Orange', filter: 'contrast(1.25) saturate(1.4) sepia(0.25) hue-rotate(160deg)' },
   { id: 'cyberpunk', label: 'Cyberpunk Neon', filter: 'contrast(1.3) saturate(1.8) hue-rotate(-20deg) brightness(1.05)' },
-  { id: 'tealOrange', label: 'Cinematic Teal & Orange', filter: 'contrast(1.25) saturate(1.4) sepia(0.25) hue-rotate(160deg)' },
-  { id: 'noir', label: 'Film Noir B&W', filter: 'grayscale(1) contrast(1.6) brightness(0.95)' },
-  { id: 'vintageKodak', label: 'Vintage Kodak 35mm', filter: 'sepia(0.35) contrast(1.15) saturate(1.2) brightness(1.02)' },
+  { id: 'noir', label: 'Arri Monochrome Noir', filter: 'grayscale(1) contrast(1.6) brightness(0.95)' },
+  { id: 'vintageKodak', label: 'Kodak 5219 35mm', filter: 'sepia(0.35) contrast(1.15) saturate(1.2) brightness(1.02)' },
   { id: 'matrix', label: 'Matrix Terminal', filter: 'hue-rotate(85deg) saturate(2.0) contrast(1.4)' },
+];
+
+export const AUDIO_EQ_PRESETS = [
+  { id: 'flat', name: 'Flat Reference', low: 0, mid: 0, high: 0 },
+  { id: 'studioVocal', name: 'Studio Vocal', low: -3, mid: 4, high: 2.5 },
+  { id: 'warmCinema', name: 'Warm Cinema', low: 3.5, mid: 1, high: -1 },
+  { id: 'deepBass', name: 'Deep Bass Punch', low: 6, mid: -2, high: 1 },
+  { id: 'lofiPhone', name: 'Lo-Fi Telephone', low: -12, mid: 6, high: -8 },
 ];
 
 export const CAPTION_STYLES = [
@@ -82,4 +90,3 @@ export const PROCEDURAL_SFX = [
   { id: 'sfxRiser', name: 'Tension Riser', duration: 3.0, desc: 'High-frequency pitch builder before drop' },
   { id: 'sfxGlitch', name: 'Digital Glitch Chirp', duration: 0.6, desc: 'Electromagnetic static burst' },
 ];
-

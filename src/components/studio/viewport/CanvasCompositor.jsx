@@ -1,18 +1,17 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useStudio } from '../../../context/StudioContext';
 import { renderCompositorFrame } from '../../../services/canvasRenderer';
 
-export default function CanvasCompositor() {
+export default function CanvasCompositor({ canvasRef }) {
   const {
     project,
     currentTime,
+    skimmerTime,
     selectedClipId,
     selectedClip,
-    updateClip,
-    setSelectedClipId
+    updateClip
   } = useStudio();
 
-  const canvasRef = useRef(null);
   const isDraggingRef = useRef(false);
   const dragStartPosRef = useRef({ x: 0, y: 0 });
   const clipStartTransformRef = useRef({ x: 0, y: 0 });
@@ -20,7 +19,7 @@ export default function CanvasCompositor() {
   const width = project.width || (project.aspectRatio === '9:16' ? 1080 : 1920);
   const height = project.height || (project.aspectRatio === '9:16' ? 1920 : 1080);
 
-  // Render loop
+  // Render loop (renders at skimmerTime if hovering/skimming, else at currentTime)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -29,9 +28,10 @@ export default function CanvasCompositor() {
 
     renderCompositorFrame(ctx, width, height, currentTime, project.clips, {
       selectedClipId,
-      showBoundingBox: !!selectedClipId
+      showBoundingBox: !!selectedClipId,
+      skimmerTime
     });
-  }, [project, currentTime, selectedClipId, width, height]);
+  }, [project, currentTime, skimmerTime, selectedClipId, width, height, canvasRef]);
 
   // Pointer drag on-canvas repositioning
   const handlePointerDown = (e) => {
@@ -90,9 +90,9 @@ export default function CanvasCompositor() {
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="w-full h-full flex items-center justify-center p-3 relative overflow-hidden">
       <div
-        className="relative max-w-full max-h-full shadow-2xl rounded-lg overflow-hidden border border-white/[0.12] bg-[#07080C]"
+        className="relative max-w-full max-h-full shadow-2xl rounded-[6px] overflow-hidden border border-[#242429] bg-[#07080C]"
         style={{
           aspectRatio: `${width} / ${height}`,
           height: project.aspectRatio === '9:16' ? '88%' : 'auto',
@@ -111,12 +111,19 @@ export default function CanvasCompositor() {
 
         {/* Selected Clip Overlay Hint */}
         {selectedClip && (
-          <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur text-[10px] font-mono text-[#00F2FE] border border-white/[0.1] pointer-events-none">
+          <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/75 backdrop-blur text-[10px] font-mono text-[#FF9F0A] border border-[#FF9F0A]/40 pointer-events-none">
             Selected: {selectedClip.name} (Drag to Reposition)
+          </div>
+        )}
+
+        {/* Skimmer Preview Badge */}
+        {skimmerTime !== null && (
+          <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-red-600/90 backdrop-blur text-[10px] font-mono text-white font-bold border border-white/20 pointer-events-none flex items-center space-x-1 tabular-nums">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            <span>SKIM: {skimmerTime.toFixed(2)}s</span>
           </div>
         )}
       </div>
     </div>
   );
 }
-

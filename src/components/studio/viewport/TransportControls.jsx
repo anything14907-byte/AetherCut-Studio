@@ -9,14 +9,12 @@ import {
   Repeat,
   RectangleHorizontal,
   RectangleVertical,
-  Square,
-  Maximize2
+  Square
 } from 'lucide-react';
 
 export default function TransportControls() {
   const {
     currentTime,
-    setCurrentTime,
     isPlaying,
     togglePlay,
     stepFrame,
@@ -24,7 +22,7 @@ export default function TransportControls() {
     setAspectRatio
   } = useStudio();
 
-  // SMPTE Timecode Formatter: HH:MM:SS:FF
+  // SMPTE Timecode Formatter: HH:MM:SS:FF with forced tabular numbers
   const formatSmpte = (seconds, fps = 30) => {
     const totalFrames = Math.floor(seconds * fps);
     const hrs = Math.floor(totalFrames / (fps * 3600));
@@ -37,23 +35,23 @@ export default function TransportControls() {
   };
 
   return (
-    <div className="h-12 bg-[#0C0E15]/95 border-t border-white/[0.08] px-4 flex items-center justify-between select-none text-xs">
-      {/* Left: SMPTE Timecode & Resolution */}
+    <div className="h-11 bg-[#161619] border-t border-[#242429] px-4 flex items-center justify-between select-none text-xs">
+      {/* Left: SMPTE Timecode */}
       <div className="flex items-center space-x-3">
-        <div className="bg-[#11131A] px-3 py-1 rounded-lg border border-white/[0.08] font-mono text-sm tracking-widest text-[#00F2FE] font-bold shadow-inner">
+        <div className="bg-[#0B0B0D] px-2.5 py-1 rounded-[5px] border border-[#242429] font-mono text-sm tracking-wider text-white font-bold tabular-nums shadow-inner">
           {formatSmpte(currentTime, project.fps || 30)}
         </div>
-        <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
+        <span className="text-[11px] font-mono text-slate-500 hidden sm:inline tabular-nums">
           / {formatSmpte(project.duration, project.fps || 30)}
         </span>
       </div>
 
       {/* Center: Play/Pause and Frame Steppers */}
-      <div className="flex items-center space-x-1.5">
+      <div className="flex items-center space-x-2">
         <button
           onClick={() => stepFrame(-1)}
           title="Previous Frame (Left Arrow)"
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#242429] transition-colors"
         >
           <SkipBack className="w-4 h-4" />
         </button>
@@ -61,7 +59,7 @@ export default function TransportControls() {
         <button
           onClick={togglePlay}
           title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
-          className="w-9 h-9 rounded-xl bg-gradient-to-r from-[#00F2FE] to-[#8A2BE2] text-obsidian-950 flex items-center justify-center hover:brightness-110 shadow-glass-glow transition-all"
+          className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center hover:bg-slate-200 transition-all shadow-sm"
         >
           {isPlaying ? (
             <Pause className="w-4 h-4 fill-current" />
@@ -73,15 +71,15 @@ export default function TransportControls() {
         <button
           onClick={() => stepFrame(1)}
           title="Next Frame (Right Arrow)"
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#242429] transition-colors"
         >
           <SkipForward className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Right: Aspect Ratio Switcher & Resolution Badge */}
+      {/* Right: Aspect Ratio Switcher */}
       <div className="flex items-center space-x-2">
-        <div className="flex items-center space-x-1 bg-[#11131A] p-0.5 rounded-lg border border-white/[0.06]">
+        <div className="flex items-center space-x-0.5 bg-[#0B0B0D] p-0.5 rounded-[6px] border border-[#242429]">
           {BRAND_CONFIG.aspectRatios.map((item) => {
             const isSelected = project.aspectRatio === item.id;
             const IconComp =
@@ -96,9 +94,9 @@ export default function TransportControls() {
                 key={item.id}
                 onClick={() => setAspectRatio(item.id)}
                 title={item.label}
-                className={`px-2 py-1 rounded text-[11px] font-mono flex items-center space-x-1 transition-all ${
+                className={`px-2 py-1 rounded-[4px] text-[10px] font-mono flex items-center space-x-1 transition-all ${
                   isSelected
-                    ? 'bg-gradient-to-r from-[#00F2FE] to-[#8A2BE2] text-obsidian-950 font-bold shadow-sm'
+                    ? 'bg-[#0A84FF] text-white font-bold shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -109,11 +107,10 @@ export default function TransportControls() {
           })}
         </div>
 
-        <span className="hidden md:inline text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-slate-400 border border-white/[0.06]">
+        <span className="hidden md:inline text-[9px] font-mono px-2 py-0.5 rounded bg-[#1C1C21] text-slate-400 border border-[#242429] tabular-nums">
           1080p FHD
         </span>
       </div>
     </div>
   );
 }
-
