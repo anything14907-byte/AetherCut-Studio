@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useStudio } from '../../context/StudioContext';
 import DockNavigation from './dock/DockNavigation';
-import TabAiDirector from './dock/TabAiDirector';
 import TabMediaLibrary from './dock/TabMediaLibrary';
-import TabTextCaptions from './dock/TabTextCaptions';
-import TabAudioVoice from './dock/TabAudioVoice';
-import TabTransitionsFx from './dock/TabTransitionsFx';
+import TabTitlesGenerators from './dock/TabTitlesGenerators';
+import TabEffectsTransitions from './dock/TabEffectsTransitions';
+import TabTimelineIndex from './dock/TabTimelineIndex';
 import CanvasViewport from './viewport/CanvasViewport';
 import InspectorPanel from './inspector/InspectorPanel';
 import TimelineEngine from './timeline/TimelineEngine';
@@ -15,12 +14,10 @@ export default function StudioWorkspace() {
     showBrowser,
     showInspector,
     leftDockWidth,
-    setLeftDockWidth,
-    workspaceMode
+    setLeftDockWidth
   } = useStudio();
 
-  // If workspaceMode is 'ai', switch activeTab to 'ai'
-  const [activeTab, setActiveTab] = useState(() => (workspaceMode === 'ai' ? 'ai' : 'ai'));
+  const [activeTab, setActiveTab] = useState('media'); // 'media' | 'titles' | 'effects' | 'index'
 
   // Right drag-resize handle for Left Asset Dock
   const handleDockResizeDown = (e) => {
@@ -55,11 +52,10 @@ export default function StudioWorkspace() {
               style={{ width: `${leftDockWidth}px` }}
               className="bg-[#161619] border-r border-[#242429] flex flex-col overflow-hidden relative"
             >
-              {activeTab === 'ai' && <TabAiDirector />}
               {activeTab === 'media' && <TabMediaLibrary />}
-              {activeTab === 'text' && <TabTextCaptions />}
-              {activeTab === 'audio' && <TabAudioVoice />}
-              {activeTab === 'fx' && <TabTransitionsFx />}
+              {activeTab === 'titles' && <TabTitlesGenerators />}
+              {activeTab === 'effects' && <TabEffectsTransitions />}
+              {activeTab === 'index' && <TabTimelineIndex />}
 
               {/* Right Drag Resize Handle for Left Dock */}
               <div

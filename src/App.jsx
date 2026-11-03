@@ -5,9 +5,8 @@ import LandingView from './components/landing/LandingView';
 import StudioWorkspace from './components/studio/StudioWorkspace';
 import ExportModal from './components/common/ExportModal';
 import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
-import ApiKeyModal from './components/common/ApiKeyModal';
 import SpotlightCommandHud from './components/common/SpotlightCommandHud';
-import { Sparkles } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 export default function App() {
   const { activeView, toastMessage } = useStudio();
@@ -26,13 +25,12 @@ export default function App() {
       <SpotlightCommandHud />
       <ExportModal />
       <KeyboardShortcutsModal />
-      <ApiKeyModal />
 
       {/* Toast Notification Pill */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4 duration-200">
           <div className="px-4 py-2.5 rounded-xl bg-[#161619]/95 border border-[#0A84FF]/40 text-slate-100 text-xs shadow-2xl backdrop-blur-md flex items-center space-x-2.5">
-            <Sparkles className="w-4 h-4 text-[#0A84FF] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[#0A84FF] shrink-0" />
             <span className="font-medium font-sans">{toastMessage}</span>
           </div>
         </div>

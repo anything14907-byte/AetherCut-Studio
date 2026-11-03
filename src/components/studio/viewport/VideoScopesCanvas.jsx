@@ -125,3 +125,4 @@ export default function VideoScopesCanvas({ sourceCanvasRef, onClose }) {
     </div>
   );
 }
+

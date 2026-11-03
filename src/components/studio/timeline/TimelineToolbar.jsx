@@ -14,7 +14,10 @@ import {
   Trash2,
   ZoomIn,
   ZoomOut,
-  Maximize2
+  Zap,
+  Bookmark,
+  Film,
+  Layers
 } from 'lucide-react';
 
 export default function TimelineToolbar() {
@@ -31,6 +34,10 @@ export default function TimelineToolbar() {
     duplicateClip,
     deleteClip,
     selectedClipId,
+    setClipSpeed,
+    insertGapClip,
+    createCompoundClip,
+    addMarker,
     zoom,
     setZoom,
     showToast
@@ -38,7 +45,7 @@ export default function TimelineToolbar() {
 
   return (
     <div className="h-11 bg-[#161619] border-t border-b border-[#242429] px-3 flex items-center justify-between select-none text-xs">
-      {/* Left: Tools, Magnetic Toggle, Skimmer & Rotary Jog Wheel */}
+      {/* Left: Editing Tools, Magnetic, Skimmer & Jog Wheel */}
       <div className="flex items-center space-x-1.5">
         {/* Select Tool (A) */}
         <button
@@ -60,12 +67,12 @@ export default function TimelineToolbar() {
         <button
           onClick={() => {
             setActiveTool('blade');
-            showToast('Blade Tool (B): Click any clip to cut');
+            splitClipAtPlayhead();
           }}
-          title="Blade Tool (B)"
+          title="Blade Tool (B): Cut clip at playhead"
           className={`p-1.5 rounded-lg transition-all ${
             activeTool === 'blade'
-              ? 'bg-red-500 text-white shadow-sm animate-pulse'
+              ? 'bg-red-500 text-white shadow-sm'
               : 'text-slate-400 hover:text-white hover:bg-[#242429]'
           }`}
         >
@@ -74,11 +81,59 @@ export default function TimelineToolbar() {
 
         <div className="h-4 w-[1px] bg-[#242429] mx-1" />
 
-        {/* Magnetic Timeline Toggle (M) */}
+        {/* Retime (Cmd+R) */}
+        <button
+          onClick={() => {
+            if (!selectedClipId) {
+              showToast('Select a clip to retime');
+              return;
+            }
+            setClipSpeed(selectedClipId, { speed: 2.0, isReversed: false });
+          }}
+          title="Retime 2x Speed (Cmd+R)"
+          className="px-2 py-1 rounded-lg text-[11px] font-mono flex items-center space-x-1 text-slate-400 hover:text-[#FF9F0A] hover:bg-[#242429] transition-all"
+        >
+          <Zap className="w-3.5 h-3.5 text-[#FF9F0A]" />
+          <span className="hidden sm:inline">Retime (⌘R)</span>
+        </button>
+
+        {/* Gap Clip (Opt+W) */}
+        <button
+          onClick={insertGapClip}
+          title="Insert Gap Clip (⌥W)"
+          className="px-2 py-1 rounded-lg text-[11px] font-mono flex items-center space-x-1 text-slate-400 hover:text-white hover:bg-[#242429] transition-all"
+        >
+          <Film className="w-3.5 h-3.5 text-slate-400" />
+          <span className="hidden md:inline">Gap (⌥W)</span>
+        </button>
+
+        {/* Compound Clip (Alt+G) */}
+        <button
+          onClick={createCompoundClip}
+          title="Compound Clip (⌥G)"
+          className="px-2 py-1 rounded-lg text-[11px] font-mono flex items-center space-x-1 text-slate-400 hover:text-[#BF5AF2] hover:bg-[#242429] transition-all"
+        >
+          <Layers className="w-3.5 h-3.5 text-[#BF5AF2]" />
+          <span className="hidden md:inline">Compound</span>
+        </button>
+
+        {/* Marker (Key M) */}
+        <button
+          onClick={() => addMarker()}
+          title="Add Marker (M)"
+          className="px-2 py-1 rounded-lg text-[11px] font-mono flex items-center space-x-1 text-slate-400 hover:text-[#30D158] hover:bg-[#242429] transition-all"
+        >
+          <Bookmark className="w-3.5 h-3.5 text-[#30D158]" />
+          <span className="hidden lg:inline">Marker (M)</span>
+        </button>
+
+        <div className="h-4 w-[1px] bg-[#242429] mx-1" />
+
+        {/* Magnetic Timeline Toggle (N) */}
         <button
           onClick={() => {
             setIsMagnetic(!isMagnetic);
-            showToast(!isMagnetic ? 'Magnetic Timeline: Enabled (M)' : 'Magnetic Timeline: Disabled (M)');
+            showToast(!isMagnetic ? 'Magnetic Timeline: Enabled (N)' : 'Magnetic Timeline: Disabled (N)');
           }}
           title={isMagnetic ? 'Magnetic Timeline Active (Clips snap automatically)' : 'Magnetic Timeline Off'}
           className={`px-2 py-1 rounded-lg text-[11px] font-mono flex items-center space-x-1 transition-all ${
@@ -115,7 +170,7 @@ export default function TimelineToolbar() {
       </div>
 
       {/* Center: Standard Edit Operations (Undo, Redo, Duplicate, Delete) */}
-      <div className="hidden lg:flex items-center space-x-1">
+      <div className="hidden xl:flex items-center space-x-1">
         <button
           onClick={undo}
           title="Undo (Cmd+Z)"
@@ -139,7 +194,7 @@ export default function TimelineToolbar() {
           className="px-2 py-1 rounded-lg text-slate-300 hover:text-white hover:bg-[#242429] disabled:opacity-30 text-[11px] font-mono flex items-center space-x-1"
         >
           <Copy className="w-3 h-3" />
-          <span>Dup (D)</span>
+          <span>Dup</span>
         </button>
 
         <button

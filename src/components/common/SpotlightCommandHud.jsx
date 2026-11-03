@@ -10,8 +10,11 @@ import {
   Volume2,
   Sliders,
   Download,
-  Layout,
-  RefreshCw,
+  Gauge,
+  Film,
+  Zap,
+  Bookmark,
+  Layers,
   Sparkles,
   Command,
   X
@@ -32,11 +35,16 @@ export default function SpotlightCommandHud() {
     voiceIsolation,
     startVideoExport,
     setWorkspaceMode,
-    setLeftDockWidth,
-    setRightInspectorWidth,
-    setTimelineHeight,
     splitClipAtPlayhead,
-    executeAiCommand,
+    insertGapClip,
+    createCompoundClip,
+    addMarker,
+    setClipSpeed,
+    selectedClipId,
+    playbackQuality,
+    setPlaybackQuality,
+    isMulticamView,
+    setIsMulticamView,
     showToast
   } = useStudio();
 
@@ -58,48 +66,103 @@ export default function SpotlightCommandHud() {
     {
       id: 'blade',
       title: 'Blade Tool (Cut Clip)',
-      desc: 'Activate razor cut mode at playhead or skimmer',
+      desc: 'Split active clip at playhead or skimmer point',
       icon: Scissors,
       shortcut: 'B',
       action: () => {
         setActiveTool('blade');
-        showToast('Blade tool activated (B)');
+        splitClipAtPlayhead();
       }
     },
     {
       id: 'select',
       title: 'Select Tool',
-      desc: 'Normal selection and trimming pointer',
+      desc: 'Normal selection pointer and clip trimmer',
       icon: MousePointer,
       shortcut: 'A',
       action: () => {
         setActiveTool('select');
-        showToast('Select tool activated (A)');
+        showToast('Select tool active (A)');
       }
     },
     {
-      id: 'split',
-      title: 'Blade at Playhead',
-      desc: 'Immediately split the active clip into two at the current frame',
-      icon: Scissors,
-      shortcut: 'S',
-      action: () => splitClipAtPlayhead()
+      id: 'marker',
+      title: 'Add Marker at Playhead',
+      desc: 'Drop a colored SMPTE reference marker',
+      icon: Bookmark,
+      shortcut: 'M',
+      action: () => addMarker()
+    },
+    {
+      id: 'gap',
+      title: 'Insert Gap Clip',
+      desc: 'Insert a 3-second black spacer on Primary Storyline',
+      icon: Film,
+      shortcut: '⌥W',
+      action: () => insertGapClip()
+    },
+    {
+      id: 'compound',
+      title: 'New Compound Clip',
+      desc: 'Bundle selected clips into a nested compound container',
+      icon: Layers,
+      shortcut: '⌥G',
+      action: () => createCompoundClip()
+    },
+    {
+      id: 'retime-2x',
+      title: 'Retime Clip: 2x Fast Motion',
+      desc: 'Speed up selected video clip by 200%',
+      icon: Zap,
+      shortcut: '⌘R',
+      action: () => setClipSpeed(selectedClipId, { speed: 2.0, isReversed: false })
+    },
+    {
+      id: 'retime-slow',
+      title: 'Retime Clip: 50% Slow Motion',
+      desc: 'Smooth cinematic half-speed retiming',
+      icon: Zap,
+      shortcut: 'Slow',
+      action: () => setClipSpeed(selectedClipId, { speed: 0.5, isReversed: false })
+    },
+    {
+      id: 'multicam',
+      title: isMulticamView ? 'Close Multicam Angle Viewer' : 'Open 4-Angle Multicam Grid',
+      desc: 'Display 2x2 synchronized multicam camera angles',
+      icon: Film,
+      shortcut: '1-4',
+      action: () => {
+        setIsMulticamView(!isMulticamView);
+        showToast(!isMulticamView ? 'Multicam: 4-Angle Grid ON' : 'Multicam Grid OFF');
+      }
+    },
+    {
+      id: 'proxy-mode',
+      title: playbackQuality === 'proxy' ? 'Switch to Full 1080p HD Buffer' : 'Switch to 540p Proxy (Zero-Lag)',
+      desc: 'Toggle fast laptop proxy buffer vs uncompressed 1080p canvas',
+      icon: Gauge,
+      shortcut: 'Proxy',
+      action: () => {
+        const next = playbackQuality === 'proxy' ? 'full' : 'proxy';
+        setPlaybackQuality(next);
+        showToast(next === 'proxy' ? 'Proxy Mode: 540p (High Performance)' : 'Proxy Mode: 1080p HD (Full Quality)');
+      }
     },
     {
       id: 'magnetic',
       title: isMagnetic ? 'Disable Magnetic Timeline' : 'Enable Magnetic Timeline',
-      desc: 'Ripple and close gaps on Primary Storyline V2 automatically',
+      desc: 'Close gaps and ripple storyline clips automatically',
       icon: Magnet,
-      shortcut: 'M',
+      shortcut: 'N',
       action: () => {
         setIsMagnetic(!isMagnetic);
-        showToast(!isMagnetic ? 'Magnetic Timeline: Enabled' : 'Magnetic Timeline: Disabled');
+        showToast(!isMagnetic ? 'Magnetic Timeline: ON' : 'Magnetic Timeline: OFF');
       }
     },
     {
       id: 'scopes',
       title: showScopes ? 'Hide Video Scopes' : 'Open Live Video Scopes',
-      desc: 'Real-time Luma Waveform & RGB Parade pixel analyzer',
+      desc: 'Real-time Luma Waveform & RGB Parade analyzer',
       icon: Activity,
       shortcut: 'Scopes',
       action: () => {
@@ -110,7 +173,7 @@ export default function SpotlightCommandHud() {
     {
       id: 'voiceIso',
       title: voiceIsolation ? 'Disable Voice Isolation' : 'Enable Voice Isolation',
-      desc: 'Enhance vocal clarity frequencies and filter ambient noise',
+      desc: 'Isolate speech frequencies and suppress background noise',
       icon: Mic,
       shortcut: 'Audio',
       action: () => toggleVoiceIsolation()
@@ -118,7 +181,7 @@ export default function SpotlightCommandHud() {
     {
       id: 'autoduck',
       title: autoDuck ? 'Disable Auto-Duck Music' : 'Enable Auto-Duck Music (-14dB)',
-      desc: 'Automatically lowers background soundtrack whenever voiceover is active',
+      desc: 'Automatically lowers background soundtrack under dialogue',
       icon: Volume2,
       shortcut: 'Mixer',
       action: () => toggleAutoDuck()
@@ -126,7 +189,7 @@ export default function SpotlightCommandHud() {
     {
       id: 'ws-color',
       title: 'Workspace: Color Grading & Scopes',
-      desc: 'Switch layout to 3-Way Color Wheels and live scopes',
+      desc: 'Switch layout to 3-Way Color Wheels and video scopes',
       icon: Sliders,
       shortcut: 'Color',
       action: () => {
@@ -143,46 +206,9 @@ export default function SpotlightCommandHud() {
       action: () => setWorkspaceMode('audio')
     },
     {
-      id: 'ws-ai',
-      title: 'Workspace: AI Co-Director',
-      desc: 'Open natural language generative editing terminal',
-      icon: Sparkles,
-      shortcut: 'AI',
-      action: () => setWorkspaceMode('ai')
-    },
-    {
-      id: 'lut-teal',
-      title: 'Apply Hollywood Teal & Orange LUT',
-      desc: 'Cinematic complementary color grading matrix',
-      icon: Sliders,
-      shortcut: 'LUT',
-      action: () => executeAiCommand('Apply teal and orange LUT')
-    },
-    {
-      id: 'lut-noir',
-      title: 'Apply Arri Monochrome Noir LUT',
-      desc: 'High contrast black and white cinema grade',
-      icon: Sliders,
-      shortcut: 'LUT',
-      action: () => executeAiCommand('Apply noir LUT')
-    },
-    {
-      id: 'reset-layout',
-      title: 'Reset Panel Sizes to Default',
-      desc: 'Restore standard Final Cut Pro workspace ergonomics',
-      icon: RefreshCw,
-      shortcut: 'Layout',
-      action: () => {
-        setLeftDockWidth(280);
-        setRightInspectorWidth(340);
-        setTimelineHeight(240);
-        showToast('Workspace panel dimensions reset');
-      }
-    },
-    {
       id: 'export',
-      title: 'Export Video (1080p WebM/MP4)',
-      desc: 'Render timeline client-side with zero watermarks',
+      title: 'Export Video (Client-Side MP4/WebM)',
+      desc: 'Render timeline at 60fps with zero watermarks',
       icon: Download,
       shortcut: 'Export',
       action: () => startVideoExport()
@@ -227,7 +253,7 @@ export default function SpotlightCommandHud() {
               setSelectedIndex(0);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Type a command or search action (e.g., 'Blade', 'Scopes', 'Audio', 'LUT')..."
+            placeholder="Type a Final Cut Pro command (e.g., 'Blade', 'Multicam', 'Scopes', 'Retime', 'Gap')..."
             className="w-full bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none font-sans"
           />
           <button

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useStudio } from '../../../context/StudioContext';
 import TimelineToolbar from './TimelineToolbar';
 import TimelineRuler from './TimelineRuler';
@@ -11,7 +11,9 @@ export default function TimelineEngine() {
     tracks,
     setTracks,
     currentTime,
+    currentTimeRef,
     setCurrentTime,
+    subscribeTime,
     zoom,
     setSelectedClipId,
     timelineHeight,
@@ -22,12 +24,34 @@ export default function TimelineEngine() {
   } = useStudio();
 
   const scrollContainerRef = useRef(null);
+  const playheadRef = useRef(null);
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const duration = project.duration || 22.0;
   const totalWidth = Math.max(1200, duration * zoom + 350);
-  const playheadLeft = currentTime * zoom;
-  const skimmerLeft = skimmerTime !== null ? skimmerTime * zoom : null;
+
+  // Decoupled 60fps Playhead DOM updates (0 React re-renders)
+  useEffect(() => {
+    // Initial position
+    if (playheadRef.current) {
+      playheadRef.current.style.transform = `translate3d(${currentTimeRef.current * zoom}px, 0, 0)`;
+    }
+
+    const unsubscribe = subscribeTime((time) => {
+      if (playheadRef.current) {
+        playheadRef.current.style.transform = `translate3d(${time * zoom}px, 0, 0)`;
+      }
+    });
+
+    return () => unsubscribe();
+  }, [subscribeTime, zoom, currentTimeRef]);
+
+  // Sync static playhead position when paused or scrubbed
+  useEffect(() => {
+    if (playheadRef.current) {
+      playheadRef.current.style.transform = `translate3d(${currentTime * zoom}px, 0, 0)`;
+    }
+  }, [currentTime, zoom]);
 
   const handleScroll = (e) => {
     setScrollLeft(e.target.scrollLeft);
@@ -52,7 +76,7 @@ export default function TimelineEngine() {
     const startH = timelineHeight;
 
     const onMove = (me) => {
-      const deltaY = startY - me.clientY; // drag up expands timeline
+      const deltaY = startY - me.clientY;
       const newH = Math.max(150, Math.min(480, startH + deltaY));
       setTimelineHeight(newH);
     };
@@ -70,12 +94,12 @@ export default function TimelineEngine() {
   const handlePlayheadPointerDown = (e) => {
     e.stopPropagation();
     const startX = e.clientX;
-    const startTime = currentTime;
+    const startTime = currentTimeRef.current;
 
     const onPointerMove = (me) => {
       const deltaX = me.clientX - startX;
       const newTime = Math.max(0, Math.min(duration, startTime + deltaX / zoom));
-      setCurrentTime(newTime);
+      setCurrentTime(newTime, true);
     };
 
     const onPointerUp = () => {
@@ -118,7 +142,6 @@ export default function TimelineEngine() {
     if (clip.parentClipId) {
       const parent = v2Clips.find((p) => p.id === clip.parentClipId);
       if (parent) {
-        // Child X & Parent X
         const childX = (clip.startTime + 0.3) * zoom;
         const isAbove = clip.trackId === 'T1' || clip.trackId === 'V1';
         stemConnections.push({
@@ -219,31 +242,29 @@ export default function TimelineEngine() {
                   style={{ left: `${stem.x}px` }}
                   className="absolute pointer-events-none z-15"
                 >
-                  {/* Stem notch dot */}
                   <div className="w-1.5 h-1.5 rounded-full bg-[#0A84FF] shadow-[0_0_6px_#0A84FF] -ml-[2px]" />
                 </div>
               ))}
 
               {/* Red Live Hover Skimmer (FF453A) with Floating Timecode */}
-              {isSkimmingEnabled && skimmerLeft !== null && (
+              {isSkimmingEnabled && skimmerTime !== null && (
                 <div
-                  style={{ left: `${skimmerLeft}px` }}
+                  style={{ left: `${skimmerTime * zoom}px` }}
                   className="absolute top-0 bottom-0 z-35 pointer-events-none flex flex-col items-center -ml-[1px]"
                 >
-                  {/* Floating Timecode Badge */}
                   <div className="px-1.5 py-0.5 rounded bg-red-600 text-white font-mono text-[9px] font-bold shadow-md -mt-5 tabular-nums">
                     {formatSmpte(skimmerTime)}
                   </div>
-                  {/* Red Skimmer Line */}
                   <div className="w-[1.5px] flex-1 bg-[#FF453A] shadow-[0_0_6px_rgba(255,69,58,0.9)]" />
                 </div>
               )}
 
-              {/* Parked Playhead (White #FFFFFF with Arrow Head) */}
+              {/* Decoupled Parked Playhead (White #FFFFFF with Arrow Head) */}
               <div
-                style={{ left: `${playheadLeft}px` }}
+                ref={playheadRef}
                 onPointerDown={handlePlayheadPointerDown}
-                className="absolute top-0 bottom-0 z-40 pointer-events-auto cursor-ew-resize flex flex-col items-center group -ml-2"
+                style={{ willChange: 'transform' }}
+                className="absolute top-0 bottom-0 left-0 z-40 pointer-events-auto cursor-ew-resize flex flex-col items-center group -ml-2"
               >
                 {/* Playhead Head (Solid White) */}
                 <div className="w-4 h-4 rounded-sm bg-white shadow-md flex items-center justify-center transform group-hover:scale-125 transition-transform border border-black/40">

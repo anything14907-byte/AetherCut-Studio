@@ -3,12 +3,10 @@ import { useStudio } from '../../context/StudioContext';
 import { BRAND_CONFIG } from '../../config/brandConfig';
 import {
   Film,
-  Sparkles,
   Download,
   FolderOpen,
   Save,
   HelpCircle,
-  Key,
   LayoutGrid,
   Play,
   Share2,
@@ -20,20 +18,17 @@ import {
   PanelRightOpen,
   PanelBottomClose,
   PanelBottomOpen,
-  Search,
-  Command
+  Search
 } from 'lucide-react';
 
 export default function Navbar() {
   const {
     activeView,
     setActiveView,
-    project,
     exportProjectJson,
     importProjectJson,
     startVideoExport,
     setIsShortcutsModalOpen,
-    setIsApiKeyModalOpen,
     setIsSpotlightOpen,
     workspaceMode,
     setWorkspaceMode,
@@ -64,8 +59,6 @@ export default function Navbar() {
       setShowInspector(true);
     } else if (mode === 'audio') {
       setShowInspector(true);
-    } else if (mode === 'ai') {
-      setShowBrowser(true);
     }
     showToast(`Workspace: ${mode.toUpperCase()}`);
   };
@@ -82,7 +75,7 @@ export default function Navbar() {
           onClick={() => setActiveView('landing')}
           className="flex items-center space-x-2 cursor-pointer group"
         >
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#00F2FE] to-[#8A2BE2] flex items-center justify-center p-0.5 shadow-sm group-hover:scale-105 transition-transform">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#0A84FF] to-[#30D158] flex items-center justify-center p-0.5 shadow-sm group-hover:scale-105 transition-transform">
             <div className="w-full h-full bg-[#161619] rounded-[6px] flex items-center justify-center">
               <Film className="w-3.5 h-3.5 text-[#0A84FF]" />
             </div>
@@ -158,17 +151,6 @@ export default function Navbar() {
           >
             <Volume2 className="w-3 h-3" />
             <span>Audio Mixing</span>
-          </button>
-          <button
-            onClick={() => handleWorkspaceChange('ai')}
-            className={`px-3 py-1 rounded-md transition-all flex items-center space-x-1 ${
-              workspaceMode === 'ai'
-                ? 'bg-[#242429] text-[#BF5AF2] font-bold shadow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Sparkles className="w-3 h-3" />
-            <span>AI Co-Director</span>
           </button>
         </div>
       )}

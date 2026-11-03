@@ -1,184 +1,154 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
-  Sparkles,
   Layers,
-  Subtitles,
-  Cpu,
-  Scissors,
-  CheckCircle2,
-  Terminal,
+  Magnet,
+  Camera,
+  Zap,
+  Sliders,
   Volume2,
-  Lock
+  Gauge,
+  Film,
+  CheckCircle2,
+  Bookmark
 } from 'lucide-react';
 
 export default function BentoShowcase() {
-  // Interactive preview state for Hormozi captions
-  const [captionWordIndex, setCaptionWordIndex] = useState(0);
-  const words = ['REVOLUTIONARY', 'CLIENT-SIDE', 'VIDEO', 'CREATOR', 'WITH', 'ZERO', 'WATERMARKS'];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCaptionWordIndex((prev) => (prev + 1) % words.length);
-    }, 650);
-    return () => clearInterval(timer);
-  }, [words.length]);
-
   return (
-    <div className="w-full max-w-6xl mx-auto py-12 px-4 space-y-6">
+    <div className="w-full max-w-6xl mx-auto py-12 px-4 space-y-6 select-none">
       <div className="text-center space-y-2 max-w-2xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-display font-bold text-white tracking-tight">
-          Engineered for <span className="gradient-text">Absolute Creative Freedom</span>
+          Crafted for <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#0A84FF] to-[#30D158]">Native Speed &amp; Precision</span>
         </h2>
         <p className="text-sm text-slate-400">
-          Professional-grade non-linear editing meets zero-latency browser AI. No subscriptions, no paywalls, no limits.
+          Professional non-linear video editing workstation running 100% in your browser. Zero subscription fees, zero watermark extortion.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-        {/* CARD 1: AI Co-Director Agent (7 cols) */}
-        <div className="md:col-span-7 bg-[#11131A]/80 border border-white/[0.08] rounded-2xl p-6 relative overflow-hidden group hover:border-[#00F2FE]/40 transition-all shadow-subtle-glow">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#00F2FE]/10 rounded-full blur-3xl pointer-events-none" />
-          
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        {/* CARD 1: Magnetic Timeline (7 cols) */}
+        <div className="md:col-span-7 bg-[#161619] border border-[#242429] rounded-2xl p-6 relative overflow-hidden group hover:border-[#0A84FF]/50 transition-all shadow-sm">
           <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-[#00F2FE]">
-              <Sparkles className="w-5 h-5" />
+            <div className="flex items-center space-x-2 text-[#0A84FF]">
+              <Magnet className="w-5 h-5" />
               <span className="text-xs uppercase font-mono font-semibold tracking-wider">
-                Autonomous Co-Pilot
+                Magnetic Storyline Engine
               </span>
             </div>
 
-            <h3 className="text-xl font-bold text-white">AI Director Command Engine</h3>
+            <h3 className="text-xl font-bold text-white">Apple Magnetic Timeline &amp; Connected Stems</h3>
             <p className="text-xs text-slate-400 leading-relaxed max-w-lg">
-              Type natural language instructions to direct your edit. Split clips at timecodes, auto-generate captions, inject procedural soundscapes, or apply cinematic color grades instantly.
+              Primary Storyline clips automatically ripple and close gaps when trimmed or deleted. Secondary audio stems and titles stay tethered to their primary anchor clips without drifting out of sync.
             </p>
 
-            {/* Interactive Terminal Demo */}
-            <div className="bg-[#07080C] border border-white/[0.08] rounded-xl p-3.5 font-mono text-xs space-y-2 shadow-inner">
-              <div className="flex items-center space-x-1.5 text-slate-500 pb-1 border-b border-white/[0.04]">
-                <Terminal className="w-3.5 h-3.5 text-[#00F2FE]" />
-                <span className="text-[11px]">ai_director_stream ~ active</span>
+            {/* Visual Timeline Track Simulation */}
+            <div className="space-y-2 pt-1 font-mono text-[10px]">
+              <div className="h-7 rounded-lg bg-[#BF5AF2]/20 border border-[#BF5AF2]/40 px-3 flex items-center justify-between text-[#BF5AF2]">
+                <span>T1: Titles &amp; Captions</span>
+                <span className="text-slate-400">Tethered Stem</span>
               </div>
-              <div className="text-slate-300">
-                <span className="text-[#00F2FE]">&gt;</span> Apply cyberpunk color grade &amp; add kinetic yellow captions
+              <div className="h-9 rounded-lg bg-[#0A84FF]/25 border-2 border-[#FF9F0A] px-3 flex items-center justify-between text-white font-bold shadow-sm">
+                <span className="flex items-center space-x-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#FF9F0A]" />
+                  <span>V2: Primary Storyline (Active Clip)</span>
+                </span>
+                <span className="text-[#FF9F0A]">Magnetic Ripple ON</span>
               </div>
-              <div className="p-2 rounded bg-[#11131A] text-emerald-400 text-[11px] border border-emerald-500/20 flex items-center space-x-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span>Mutated 4 timeline clips. Saturation +40%, LUT active, captions synced.</span>
+              <div className="h-7 rounded-lg bg-[#30D158]/20 border border-[#30D158]/40 px-3 flex items-center justify-between text-[#30D158]">
+                <span>A1: Stereo Audio &amp; Waveforms</span>
+                <span className="text-slate-400">dBFS Monitored</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* CARD 2: Multi-Track Timeline Precision (5 cols) */}
-        <div className="md:col-span-5 bg-[#11131A]/80 border border-white/[0.08] rounded-2xl p-6 relative overflow-hidden group hover:border-[#8A2BE2]/40 transition-all shadow-subtle-glow">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#8A2BE2]/10 rounded-full blur-3xl pointer-events-none" />
-
+        {/* CARD 2: 4-Angle Multicam (5 cols) */}
+        <div className="md:col-span-5 bg-[#161619] border border-[#242429] rounded-2xl p-6 relative overflow-hidden group hover:border-[#30D158]/50 transition-all shadow-sm">
           <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-[#8A2BE2]">
-              <Layers className="w-5 h-5" />
+            <div className="flex items-center space-x-2 text-[#30D158]">
+              <Camera className="w-5 h-5" />
               <span className="text-xs uppercase font-mono font-semibold tracking-wider">
-                Precision NLE
+                Multi-Angle Switching
               </span>
             </div>
 
-            <h3 className="text-xl font-bold text-white">4 Dedicated Tracks</h3>
+            <h3 className="text-xl font-bold text-white">4-Angle Multicam Grid</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              True non-linear editing with dedicated tracks for Text (T1), Overlays (V1), Main Visuals (V2), and Audio (A1) with trim handles and split-at-playhead.
+              Synchronize up to four camera angles simultaneously in a live 2x2 grid. Switch or cut angles on-the-fly using hotkeys 1, 2, 3, and 4 during playback.
             </p>
 
-            {/* Mini Visual Track Stack */}
-            <div className="space-y-1.5 pt-1">
-              <div className="h-6 rounded bg-[#8A2BE2]/20 border border-[#8A2BE2]/40 px-2 flex items-center justify-between text-[10px] font-mono text-[#8A2BE2]">
-                <span>T1: Kinetic Captions</span>
-                <span>00:00 - 00:22</span>
+            {/* 2x2 Mini Multicam Matrix */}
+            <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[10px]">
+              <div className="h-12 rounded-lg bg-[#111114] border border-[#0A84FF] p-2 flex flex-col justify-between text-[#0A84FF] font-bold">
+                <span>Angle 1 (Wide)</span>
+                <span className="text-[9px] text-white bg-[#0A84FF] px-1 rounded w-fit">ACTIVE</span>
               </div>
-              <div className="h-6 rounded bg-[#00F2FE]/20 border border-[#00F2FE]/40 px-2 flex items-center justify-between text-[10px] font-mono text-[#00F2FE]">
-                <span>V1: PIP Terminal HUD</span>
-                <span>00:03 - 00:11</span>
+              <div className="h-12 rounded-lg bg-[#111114] border border-[#242429] p-2 flex flex-col justify-between text-slate-400">
+                <span>Angle 2 (Close-Up)</span>
+                <span className="text-[9px] text-slate-500">Key 2</span>
               </div>
-              <div className="h-6 rounded bg-[#3B82F6]/20 border border-[#3B82F6]/40 px-2 flex items-center justify-between text-[10px] font-mono text-[#3B82F6]">
-                <span>V2: Cyber Grid Scene</span>
-                <span>00:00 - 00:22</span>
+              <div className="h-12 rounded-lg bg-[#111114] border border-[#242429] p-2 flex flex-col justify-between text-slate-400">
+                <span>Angle 3 (Overhead)</span>
+                <span className="text-[9px] text-slate-500">Key 3</span>
               </div>
-              <div className="h-6 rounded bg-[#10B981]/20 border border-[#10B981]/40 px-2 flex items-center justify-between text-[10px] font-mono text-[#10B981]">
-                <span>A1: Dark Synthwave &amp; Voice</span>
-                <span>120 BPM</span>
+              <div className="h-12 rounded-lg bg-[#111114] border border-[#242429] p-2 flex flex-col justify-between text-slate-400">
+                <span>Angle 4 (B-Roll)</span>
+                <span className="text-[9px] text-slate-500">Key 4</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* CARD 3: Instant Kinetic Captions (5 cols) */}
-        <div className="md:col-span-5 bg-[#11131A]/80 border border-white/[0.08] rounded-2xl p-6 relative overflow-hidden group hover:border-amber-400/40 transition-all shadow-subtle-glow">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-amber-400">
-              <Subtitles className="w-5 h-5" />
+        {/* CARD 3: Speed Ramping (4 cols) */}
+        <div className="md:col-span-4 bg-[#161619] border border-[#242429] rounded-2xl p-6 relative overflow-hidden group hover:border-[#FF9F0A]/50 transition-all shadow-sm">
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 text-[#FF9F0A]">
+              <Zap className="w-5 h-5" />
               <span className="text-xs uppercase font-mono font-semibold tracking-wider">
-                Viral Subtitles
+                Retiming Suite
               </span>
             </div>
 
-            <h3 className="text-xl font-bold text-white">Hormozi Word Highlights</h3>
+            <h3 className="text-lg font-bold text-white">Speed Ramping (⌘R)</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Kinetic subtitle engine highlights each word dynamically as it is spoken. Switch to Neon Glow, Minimal Cinema, or Bold Impact with one click.
+              Create smooth cinematic ramps from 25% super slow-motion up to 400% hyperlapse, instant freeze frames, and reverse playback with one keystroke.
             </p>
-
-            {/* Live Interactive Word Highlight Simulation */}
-            <div className="h-20 bg-[#07080C] rounded-xl border border-white/[0.08] flex items-center justify-center p-3 text-center">
-              <div className="flex flex-wrap items-center justify-center gap-1.5">
-                {words.map((word, i) => {
-                  const isActive = i === captionWordIndex;
-                  return (
-                    <span
-                      key={i}
-                      className={`text-xs md:text-sm font-extrabold uppercase transition-all duration-150 px-1.5 py-0.5 rounded ${
-                        isActive
-                          ? 'bg-[#181B26] text-[#FACC15] scale-110 shadow-lg border border-[#FACC15]'
-                          : 'text-slate-400'
-                      }`}
-                    >
-                      {word}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* CARD 4: Zero-Cost Client-Side Engine (7 cols) */}
-        <div className="md:col-span-7 bg-[#11131A]/80 border border-white/[0.08] rounded-2xl p-6 relative overflow-hidden group hover:border-[#10B981]/40 transition-all shadow-subtle-glow">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-[#10B981]">
-              <Cpu className="w-5 h-5" />
+        {/* CARD 4: 3-Way Color Wheels & Scopes (4 cols) */}
+        <div className="md:col-span-4 bg-[#161619] border border-[#242429] rounded-2xl p-6 relative overflow-hidden group hover:border-[#BF5AF2]/50 transition-all shadow-sm">
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 text-[#BF5AF2]">
+              <Sliders className="w-5 h-5" />
               <span className="text-xs uppercase font-mono font-semibold tracking-wider">
-                Hardware Accelerated
+                Color Grading
               </span>
             </div>
 
-            <h3 className="text-xl font-bold text-white">100% Client-Side Video Rendering</h3>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-lg">
-              Composited via HTML5 Canvas 2D at 60fps and captured with native WebCodecs &amp; Web Audio API. Your video renders directly on your CPU/GPU with zero server costs and zero data transmission.
+            <h3 className="text-lg font-bold text-white">3-Way Color Wheels &amp; Scopes</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Individual Lift (shadows), Gamma (midtones), and Gain (highlights) color wheels with live Luma Waveform and RGB Parade analyzers downsampled for 0% UI lag.
             </p>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-3 gap-3 pt-1">
-              <div className="p-3 rounded-xl bg-[#07080C] border border-white/[0.06] text-center">
-                <span className="block text-lg font-bold font-mono text-[#00F2FE]">0ms</span>
-                <span className="text-[11px] text-slate-400">Server Latency</span>
-              </div>
-              <div className="p-3 rounded-xl bg-[#07080C] border border-white/[0.06] text-center">
-                <span className="block text-lg font-bold font-mono text-emerald-400">100%</span>
-                <span className="text-[11px] text-slate-400">Watermark Free</span>
-              </div>
-              <div className="p-3 rounded-xl bg-[#07080C] border border-white/[0.06] text-center">
-                <span className="block text-lg font-bold font-mono text-[#8A2BE2]">$0</span>
-                <span className="text-[11px] text-slate-400">Subscription Cost</span>
-              </div>
+        {/* CARD 5: Zero-Lag Hardware Acceleration (4 cols) */}
+        <div className="md:col-span-4 bg-[#161619] border border-[#242429] rounded-2xl p-6 relative overflow-hidden group hover:border-[#30D158]/50 transition-all shadow-sm">
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 text-[#30D158]">
+              <Gauge className="w-5 h-5" />
+              <span className="text-xs uppercase font-mono font-semibold tracking-wider">
+                Zero-Lag Architecture
+              </span>
             </div>
+
+            <h3 className="text-lg font-bold text-white">540p Fast Proxy Mode</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Decoupled playhead eliminates 60fps React re-renders. Paused on-demand rendering yields 0% idle CPU, delivering buttery playback on any budget laptop.
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

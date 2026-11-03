@@ -6,10 +6,16 @@ export default function CanvasCompositor({ canvasRef }) {
   const {
     project,
     currentTime,
+    currentTimeRef,
+    subscribeTime,
+    isPlaying,
     skimmerTime,
     selectedClipId,
     selectedClip,
-    updateClip
+    updateClip,
+    playbackQuality,
+    isMulticamView,
+    activeMulticamAngle
   } = useStudio();
 
   const isDraggingRef = useRef(false);
@@ -19,21 +25,42 @@ export default function CanvasCompositor({ canvasRef }) {
   const width = project.width || (project.aspectRatio === '9:16' ? 1080 : 1920);
   const height = project.height || (project.aspectRatio === '9:16' ? 1920 : 1080);
 
-  // Render loop (renders at skimmerTime if hovering/skimming, else at currentTime)
-  useEffect(() => {
+  // Render on-demand helper (0% CPU when idle)
+  const drawFrame = (time) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    renderCompositorFrame(ctx, width, height, currentTime, project.clips, {
+    renderCompositorFrame(ctx, width, height, time, project.clips, {
       selectedClipId,
       showBoundingBox: !!selectedClipId,
-      skimmerTime
+      skimmerTime,
+      quality: playbackQuality,
+      isMulticam: isMulticamView,
+      activeMulticamAngle
     });
-  }, [project, currentTime, skimmerTime, selectedClipId, width, height, canvasRef]);
+  };
 
-  // Pointer drag on-canvas repositioning
+  // 1. When playback is ACTIVE: Subscribe directly to sub-frame RAF updates (0 React re-renders)
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const unsubscribe = subscribeTime((time) => {
+      drawFrame(time);
+    });
+
+    return () => unsubscribe();
+  }, [isPlaying, subscribeTime, project, selectedClipId, skimmerTime, playbackQuality, isMulticamView, activeMulticamAngle, width, height]);
+
+  // 2. When PAUSED: Render exactly ONCE on state/clip/time changes (0% idle CPU)
+  useEffect(() => {
+    if (isPlaying) return;
+    const timeToRender = skimmerTime !== null ? skimmerTime : currentTime;
+    drawFrame(timeToRender);
+  }, [isPlaying, currentTime, skimmerTime, project, selectedClipId, playbackQuality, isMulticamView, activeMulticamAngle, width, height]);
+
+  // Direct pointer drag on-canvas repositioning
   const handlePointerDown = (e) => {
     if (!selectedClip) return;
     const canvas = canvasRef.current;
@@ -110,9 +137,16 @@ export default function CanvasCompositor({ canvasRef }) {
         />
 
         {/* Selected Clip Overlay Hint */}
-        {selectedClip && (
+        {selectedClip && !isMulticamView && (
           <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/75 backdrop-blur text-[10px] font-mono text-[#FF9F0A] border border-[#FF9F0A]/40 pointer-events-none">
-            Selected: {selectedClip.name} (Drag to Reposition)
+            {selectedClip.name} ({selectedClip.role || 'Video'})
+          </div>
+        )}
+
+        {/* Multicam Angle Switcher Hint */}
+        {isMulticamView && (
+          <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-[#0A84FF]/90 backdrop-blur text-[10px] font-mono text-white font-bold border border-white/20 pointer-events-none flex items-center space-x-1">
+            <span>MULTICAM: ANGLE {activeMulticamAngle} ACTIVE (PRESS 1-4)</span>
           </div>
         )}
 

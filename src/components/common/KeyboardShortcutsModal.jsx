@@ -9,15 +9,20 @@ export default function KeyboardShortcutsModal() {
 
   const shortcuts = [
     { key: 'Space', desc: 'Play / Pause timeline playback' },
-    { key: 'B', desc: 'Blade Tool (Activate cut mode)' },
-    { key: 'A', desc: 'Select Tool (Default pointer)' },
-    { key: 'S', desc: 'Toggle Live Hover Skimming' },
-    { key: 'M', desc: 'Toggle Magnetic Timeline' },
-    { key: 'Cmd / Ctrl + K', desc: 'Spotlight Command HUD' },
-    { key: 'D', desc: 'Duplicate currently selected clip' },
-    { key: 'Delete / Backspace', desc: 'Delete clip (with Magnetic Ripple)' },
-    { key: 'Cmd / Ctrl + Z', desc: 'Undo last editor action' },
-    { key: 'Cmd / Ctrl + Y', desc: 'Redo previously undone action' },
+    { key: '1, 2, 3, 4', desc: 'Multicam: Cut to Camera Angle 1, 2, 3, or 4' },
+    { key: '⌘ / Ctrl + R', desc: 'Speed Retiming (2x Fast Ramp)' },
+    { key: 'M', desc: 'Add Marker at playhead' },
+    { key: '⌥ / Alt + W', desc: 'Insert 3-second Gap Clip on Storyline' },
+    { key: '⌥ / Alt + G', desc: 'Create Compound Clip from selection' },
+    { key: 'B', desc: 'Blade Tool (Cut clip at playhead)' },
+    { key: 'A', desc: 'Select Tool (Default cursor)' },
+    { key: 'N', desc: 'Toggle Magnetic Timeline & Snapping' },
+    { key: 'S', desc: 'Toggle Live Hover Skimmer' },
+    { key: '⌘ / Ctrl + K', desc: 'Spotlight Command HUD' },
+    { key: 'D', desc: 'Duplicate selected clip' },
+    { key: 'Delete / ⌫', desc: 'Ripple Delete clip (Magnetic Snap)' },
+    { key: '⌘ / Ctrl + Z', desc: 'Undo last editor action' },
+    { key: '⌘ / Ctrl + Y', desc: 'Redo previously undone action' },
     { key: '← / →', desc: 'Step playhead back / forward 1 frame' },
     { key: 'Shift + ← / →', desc: 'Step playhead back / forward 1 second' },
     { key: 'Esc', desc: 'Deselect active clip / close modals' },
@@ -52,7 +57,7 @@ export default function KeyboardShortcutsModal() {
         </div>
 
         <div className="px-5 py-3 bg-[#111114] border-t border-[#242429] flex items-center justify-between text-[11px] text-slate-400 font-mono">
-          <span>Apple Final Cut Pro Studio Edition</span>
+          <span>Apple Final Cut Pro Web Edition</span>
           <span className="text-[#0A84FF]">Press Esc to close</span>
         </div>
       </div>

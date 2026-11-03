@@ -254,3 +254,4 @@ export default function ColorWheelsInspector({ clip, onUpdate }) {
     </div>
   );
 }
+
