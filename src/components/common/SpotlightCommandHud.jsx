@@ -6,18 +6,21 @@ import {
   MousePointer,
   Magnet,
   Activity,
-  Mic,
-  Volume2,
-  Sliders,
   Download,
-  Gauge,
-  Film,
   Zap,
   Bookmark,
   Layers,
   Sparkles,
   Command,
-  X
+  X,
+  EyeOff,
+  Pause,
+  PlusSquare,
+  ArrowDownCircle,
+  ArrowRightCircle,
+  Tag,
+  HelpCircle,
+  Gauge
 } from 'lucide-react';
 
 export default function SpotlightCommandHud() {
@@ -29,15 +32,10 @@ export default function SpotlightCommandHud() {
     isMagnetic,
     setShowScopes,
     showScopes,
-    toggleVoiceIsolation,
-    toggleAutoDuck,
-    autoDuck,
-    voiceIsolation,
-    startVideoExport,
-    setWorkspaceMode,
+    setIsShareModalOpen,
     splitClipAtPlayhead,
-    insertGapClip,
-    createCompoundClip,
+    createHoldFrame,
+    toggleClipDisabled,
     addMarker,
     setClipSpeed,
     selectedClipId,
@@ -45,6 +43,12 @@ export default function SpotlightCommandHud() {
     setPlaybackQuality,
     isMulticamView,
     setIsMulticamView,
+    appendClip,
+    insertClip,
+    connectClip,
+    overwriteClip,
+    setIsKeywordsModalOpen,
+    setIsShortcutsModalOpen,
     showToast
   } = useStudio();
 
@@ -64,14 +68,74 @@ export default function SpotlightCommandHud() {
 
   const commands = [
     {
+      id: 'connect',
+      title: 'Connect to Primary Storyline',
+      desc: 'Attach selected media as a connected cutaway / title / b-roll',
+      icon: PlusSquare,
+      shortcut: 'Q',
+      action: () => connectClip()
+    },
+    {
+      id: 'insert',
+      title: 'Insert into Primary Storyline',
+      desc: 'Splice media into the magnetic storyline and ripple following clips',
+      icon: ArrowDownCircle,
+      shortcut: 'W',
+      action: () => insertClip()
+    },
+    {
+      id: 'append',
+      title: 'Append to Primary Storyline',
+      desc: 'Add clip to the very end of the primary magnetic storyline',
+      icon: ArrowRightCircle,
+      shortcut: 'E',
+      action: () => appendClip()
+    },
+    {
+      id: 'overwrite',
+      title: 'Overwrite Clip',
+      desc: 'Replace storyline footage starting at the playhead position',
+      icon: ArrowDownCircle,
+      shortcut: 'D',
+      action: () => overwriteClip()
+    },
+    {
       id: 'blade',
       title: 'Blade Tool (Cut Clip)',
-      desc: 'Split active clip at playhead or skimmer point',
+      desc: 'Split active clip at playhead or skimmer position',
       icon: Scissors,
-      shortcut: 'B',
+      shortcut: 'B / ⌘B',
       action: () => {
         setActiveTool('blade');
         splitClipAtPlayhead();
+      }
+    },
+    {
+      id: 'disable',
+      title: 'Disable / Enable Clip (Mute)',
+      desc: 'Toggle clip visibility/audibility (dims clip to 35% opacity)',
+      icon: EyeOff,
+      shortcut: 'V',
+      action: () => {
+        if (selectedClipId) {
+          toggleClipDisabled(selectedClipId);
+        } else {
+          showToast('Select a clip first to enable/disable (V)');
+        }
+      }
+    },
+    {
+      id: 'hold-frame',
+      title: 'Add Hold Frame (Freeze Frame)',
+      desc: 'Insert a 2-second frozen frame at the current playhead position',
+      icon: Pause,
+      shortcut: '⇧H',
+      action: () => {
+        if (selectedClipId) {
+          createHoldFrame(selectedClipId);
+        } else {
+          showToast('Select a clip first to freeze frame (Shift+H)');
+        }
       }
     },
     {
@@ -94,25 +158,9 @@ export default function SpotlightCommandHud() {
       action: () => addMarker()
     },
     {
-      id: 'gap',
-      title: 'Insert Gap Clip',
-      desc: 'Insert a 3-second black spacer on Primary Storyline',
-      icon: Film,
-      shortcut: '⌥W',
-      action: () => insertGapClip()
-    },
-    {
-      id: 'compound',
-      title: 'New Compound Clip',
-      desc: 'Bundle selected clips into a nested compound container',
-      icon: Layers,
-      shortcut: '⌥G',
-      action: () => createCompoundClip()
-    },
-    {
       id: 'retime-2x',
       title: 'Retime Clip: 2x Fast Motion',
-      desc: 'Speed up selected video clip by 200%',
+      desc: 'Speed up selected video clip by 200% (Cyan speed bar)',
       icon: Zap,
       shortcut: '⌘R',
       action: () => setClipSpeed(selectedClipId, { speed: 2.0, isReversed: false })
@@ -120,7 +168,7 @@ export default function SpotlightCommandHud() {
     {
       id: 'retime-slow',
       title: 'Retime Clip: 50% Slow Motion',
-      desc: 'Smooth cinematic half-speed retiming',
+      desc: 'Smooth cinematic half-speed retiming (Orange speed bar)',
       icon: Zap,
       shortcut: 'Slow',
       action: () => setClipSpeed(selectedClipId, { speed: 0.5, isReversed: false })
@@ -129,7 +177,7 @@ export default function SpotlightCommandHud() {
       id: 'multicam',
       title: isMulticamView ? 'Close Multicam Angle Viewer' : 'Open 4-Angle Multicam Grid',
       desc: 'Display 2x2 synchronized multicam camera angles',
-      icon: Film,
+      icon: Layers,
       shortcut: '1-4',
       action: () => {
         setIsMulticamView(!isMulticamView);
@@ -164,54 +212,35 @@ export default function SpotlightCommandHud() {
       title: showScopes ? 'Hide Video Scopes' : 'Open Live Video Scopes',
       desc: 'Real-time Luma Waveform & RGB Parade analyzer',
       icon: Activity,
-      shortcut: 'Scopes',
+      shortcut: '⌘7',
       action: () => {
         setShowScopes(!showScopes);
         showToast(!showScopes ? 'Video Scopes: Active' : 'Video Scopes: Hidden');
       }
     },
     {
-      id: 'voiceIso',
-      title: voiceIsolation ? 'Disable Voice Isolation' : 'Enable Voice Isolation',
-      desc: 'Isolate speech frequencies and suppress background noise',
-      icon: Mic,
-      shortcut: 'Audio',
-      action: () => toggleVoiceIsolation()
+      id: 'keywords',
+      title: 'Keyword Editor',
+      desc: 'Assign keywords and Smart Collection tags to selected clips',
+      icon: Tag,
+      shortcut: '⌘K',
+      action: () => setIsKeywordsModalOpen(true)
     },
     {
-      id: 'autoduck',
-      title: autoDuck ? 'Disable Auto-Duck Music' : 'Enable Auto-Duck Music (-14dB)',
-      desc: 'Automatically lowers background soundtrack under dialogue',
-      icon: Volume2,
-      shortcut: 'Mixer',
-      action: () => toggleAutoDuck()
-    },
-    {
-      id: 'ws-color',
-      title: 'Workspace: Color Grading & Scopes',
-      desc: 'Switch layout to 3-Way Color Wheels and video scopes',
-      icon: Sliders,
-      shortcut: 'Color',
-      action: () => {
-        setWorkspaceMode('color');
-        setShowScopes(true);
-      }
-    },
-    {
-      id: 'ws-audio',
-      title: 'Workspace: Audio Mixing Suite',
-      desc: 'Switch layout to stereo dBFS peak meters and vocal EQ',
-      icon: Volume2,
-      shortcut: 'Audio',
-      action: () => setWorkspaceMode('audio')
+      id: 'shortcuts',
+      title: 'Keyboard Shortcuts Cheat Sheet',
+      desc: 'View complete macOS Final Cut Pro keyboard map',
+      icon: HelpCircle,
+      shortcut: '?',
+      action: () => setIsShortcutsModalOpen(true)
     },
     {
       id: 'export',
-      title: 'Export Video (Client-Side MP4/WebM)',
-      desc: 'Render timeline at 60fps with zero watermarks',
+      title: 'Share Video (macOS Export Sheet)',
+      desc: 'Render timeline to pristine MP4/ProRes with zero watermarks',
       icon: Download,
-      shortcut: 'Export',
-      action: () => startVideoExport()
+      shortcut: '⌘E',
+      action: () => setIsShareModalOpen(true)
     }
   ];
 
@@ -240,9 +269,9 @@ export default function SpotlightCommandHud() {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-start justify-center pt-24 p-4 select-none animate-in fade-in duration-150">
-      <div className="w-full max-w-xl bg-[#161619] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-xl bg-[#1E1E20] border border-black rounded-xl shadow-2xl overflow-hidden flex flex-col">
         {/* Search Bar Header */}
-        <div className="p-3.5 border-b border-[#242429] flex items-center space-x-3 bg-[#1C1C21]">
+        <div className="p-3.5 border-b border-black flex items-center space-x-3 bg-[#242427]">
           <Search className="w-5 h-5 text-[#0A84FF] shrink-0" />
           <input
             ref={inputRef}
@@ -253,19 +282,19 @@ export default function SpotlightCommandHud() {
               setSelectedIndex(0);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Type a Final Cut Pro command (e.g., 'Blade', 'Multicam', 'Scopes', 'Retime', 'Gap')..."
-            className="w-full bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none font-sans"
+            placeholder="Type a Final Cut Pro command (e.g., 'Connect', 'Blade', 'Scopes', 'Hold Frame')..."
+            className="w-full bg-transparent text-sm text-white placeholder-[#8E8E93] focus:outline-none font-sans"
           />
           <button
             onClick={() => setIsSpotlightOpen(false)}
-            className="p-1 rounded-md text-slate-400 hover:text-white"
+            className="p-1 rounded-md text-[#8E8E93] hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Results List */}
-        <div className="max-h-[380px] overflow-y-auto divide-y divide-[#242429] p-1.5">
+        <div className="max-h-[380px] overflow-y-auto divide-y divide-[#161618] p-1.5 bg-[#1E1E20]">
           {filtered.length > 0 ? (
             filtered.map((item, idx) => {
               const IconComp = item.icon;
@@ -278,16 +307,16 @@ export default function SpotlightCommandHud() {
                     setIsSpotlightOpen(false);
                   }}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`px-3 py-2.5 rounded-xl cursor-pointer flex items-center justify-between transition-colors ${
+                  className={`px-3 py-2.5 rounded-lg cursor-pointer flex items-center justify-between transition-colors ${
                     isSelected
                       ? 'bg-[#0A84FF] text-white'
-                      : 'text-slate-300 hover:bg-[#1C1C21]'
+                      : 'text-[#D1D1D6] hover:bg-[#28282C]'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                        isSelected ? 'bg-white/20 text-white' : 'bg-[#242429] text-[#0A84FF]'
+                      className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${
+                        isSelected ? 'bg-white/20 text-white' : 'bg-[#2A2A2E] text-[#0A84FF]'
                       }`}
                     >
                       <IconComp className="w-4 h-4" />
@@ -298,7 +327,7 @@ export default function SpotlightCommandHud() {
                       </span>
                       <span
                         className={`text-[11px] block ${
-                          isSelected ? 'text-white/80' : 'text-slate-400'
+                          isSelected ? 'text-white/80' : 'text-[#8E8E93]'
                         }`}
                       >
                         {item.desc}
@@ -310,7 +339,7 @@ export default function SpotlightCommandHud() {
                     className={`px-2 py-0.5 rounded font-mono text-[10px] uppercase font-bold shrink-0 ${
                       isSelected
                         ? 'bg-black/30 text-white'
-                        : 'bg-[#1C1C21] text-slate-400 border border-white/[0.08]'
+                        : 'bg-[#161618] text-[#8E8E93] border border-black'
                     }`}
                   >
                     {item.shortcut}
@@ -319,15 +348,17 @@ export default function SpotlightCommandHud() {
               );
             })
           ) : (
-            <div className="py-8 text-center text-slate-500 text-xs font-mono">
+            <div className="py-8 text-center text-[#8E8E93] text-xs font-mono">
               No matching Final Cut Pro commands found.
             </div>
           )}
         </div>
 
         {/* Footer Hint */}
-        <div className="px-4 py-2 bg-[#101013] border-t border-[#242429] flex items-center justify-between text-[11px] text-slate-500 font-mono">
-          <span>Final Cut Pro Spotlight HUD</span>
+        <div className="px-4 py-2 bg-[#161618] border-t border-black flex items-center justify-between text-[11px] text-[#8E8E93] font-mono">
+          <span className="flex items-center gap-1.5 text-white/70">
+            <Command className="w-3.5 h-3.5 text-[#0A84FF]" /> Final Cut Pro Command HUD
+          </span>
           <div className="flex items-center space-x-3">
             <span>↑↓ Navigate</span>
             <span>↵ Execute</span>

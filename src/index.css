@@ -4,78 +4,110 @@
 
 @layer base {
   :root {
-    --fcp-bg: #0B0B0D;
-    --fcp-surface: #161619;
-    --fcp-surface-elevated: #1C1C21;
-    --fcp-border: #242429;
-    --fcp-border-specular: rgba(255, 255, 255, 0.08);
-    --fcp-amber: #FF9F0A;
+    --fcp-chrome: #1E1E20;
+    --fcp-timeline-well: #161618;
+    --fcp-storyline-spine: #0D0D0F;
+    --fcp-toolbar: #222225;
+    --fcp-lcd-bg: #0A0A0C;
+    --fcp-selection: #F5A623;
     --fcp-accent: #0A84FF;
     --fcp-skimmer: #FF453A;
+    --fcp-playhead: #FFFFFF;
   }
 
   body {
-    background-color: #0B0B0D;
-    color: #F2F2F7;
-    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
-    overflow-x: hidden;
+    background-color: #1E1E20;
+    color: #ECECEE;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+    overflow: hidden;
     user-select: none;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Custom Pro Scrollbars */
+  /* macOS Pro Scrollbar */
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0E0E12;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #2A2A33;
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #3D3D4A;
+    background: rgba(255, 255, 255, 0.28);
   }
 }
 
-/* Final Cut Pro Panel Ergonomics */
-.fcp-panel {
-  background-color: #161619;
-  border: 1px solid #242429;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+/* Apple Pro-App 1px Structural Divider with Top Bevel Highlight */
+.fcp-pane {
+  background-color: #1E1E20;
+  border: 1px solid #000000;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
-.fcp-surface-elevated {
-  background-color: #1C1C21;
-  border: 1px solid #282830;
+.fcp-pane-noborder {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
-/* Force Tabular Numbers to Prevent Jitter During 60fps Playback */
-.font-timecode, .tabular-nums, .font-mono {
-  font-family: 'JetBrains Mono', monospace !important;
+/* Exact Final Cut Pro Yellow/Amber Selection Outline */
+.fcp-selected {
+  outline: 2px solid #F5A623 !important;
+  outline-offset: -1px;
+  border-radius: 4px !important;
+  z-index: 30 !important;
+  box-shadow: 0 0 12px rgba(245, 166, 35, 0.4) !important;
+}
+
+/* Clip Disabled (Key V) - Dims to 35% opacity just like native FCP */
+.fcp-clip-disabled {
+  opacity: 0.35 !important;
+  filter: grayscale(0.5);
+}
+
+/* Tabular Numbers to Prevent Digit Jitter */
+.font-timecode, .tabular-nums {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace !important;
   font-variant-numeric: tabular-nums !important;
   font-feature-settings: "tnum" 1, "zero" 1 !important;
 }
 
-/* Final Cut Pro Amber/Gold Active Selection */
-.fcp-clip-selected {
-  outline: 2px solid #FF9F0A !important;
-  box-shadow: 0 0 12px rgba(255, 159, 10, 0.5), inset 0 0 4px rgba(255, 159, 10, 0.35) !important;
-  border-radius: 6px !important;
-  z-index: 30 !important;
+/* ZERO-DOM-BLOAT RULER: CSS Repeating Gradient Ticks (0 Child DIV Nodes) */
+.fcp-ruler-ticks {
+  background-image: 
+    /* Sub-second minor ticks */
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.12) 0px,
+      rgba(255, 255, 255, 0.12) 1px,
+      transparent 1px,
+      transparent 10px
+    ),
+    /* Major second ticks */
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.32) 0px,
+      rgba(255, 255, 255, 0.32) 1px,
+      transparent 1px,
+      transparent 50px
+    );
+  background-size: 10px 6px, 50px 10px;
+  background-repeat: repeat-x;
+  background-position: left bottom, left bottom;
 }
 
-/* Filmstrip Frames Background Pattern for V1/V2 Video Clips */
-.fcp-filmstrip {
+/* ZERO-DOM-BLOAT FILMSTRIP: CSS Repeating Gradient (0 Child DIV Nodes) */
+.fcp-filmstrip-pattern {
   background-image: 
     repeating-linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.04) 0px,
-      rgba(255, 255, 255, 0.04) 1px,
+      rgba(0, 0, 0, 0.35) 0px,
+      rgba(0, 0, 0, 0.35) 1px,
       transparent 1px,
-      transparent 32px
+      transparent 36px
     ),
     linear-gradient(
       180deg,
@@ -84,99 +116,52 @@
       transparent calc(100% - 4px),
       rgba(0, 0, 0, 0.4) 100%
     );
-  background-size: 32px 100%, 100% 100%;
+  background-size: 36px 100%, 100% 100%;
 }
 
-/* Connected Storyline Stem Line */
-.fcp-stem-line {
-  position: absolute;
-  width: 2px;
-  background-color: rgba(255, 255, 255, 0.3);
-  pointer-events: none;
-  z-index: 15;
-}
-
-.fcp-stem-notch {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #0A84FF;
-  box-shadow: 0 0 6px rgba(10, 132, 255, 0.8);
-  pointer-events: none;
-}
-
-/* Glassmorphic Surfaces */
-.glass-panel {
-  background: rgba(22, 22, 25, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid #242429;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-dropdown {
-  background: rgba(18, 18, 22, 0.96);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.85);
-}
-
-/* Electric Gradients & Glows */
-.gradient-text {
-  background: linear-gradient(135deg, #00F2FE 0%, #8A2BE2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Timeline Custom Elements */
-.timeline-scrub-ruler {
+/* ZERO-DOM-BLOAT AUDIO WAVEFORM: CSS Data URL Waveform Pattern */
+.fcp-waveform-pattern-music {
   background-image: repeating-linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.12) 0px,
-    rgba(255, 255, 255, 0.12) 1px,
-    transparent 1px,
-    transparent 10px
+    #42B874 0px,
+    #42B874 2px,
+    transparent 2px,
+    transparent 4px
   );
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 50%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 50%, black 40%, transparent 100%);
+  opacity: 0.65;
 }
 
-.timeline-scrub-ruler-major {
+.fcp-waveform-pattern-dialogue {
   background-image: repeating-linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.28) 0px,
-    rgba(255, 255, 255, 0.28) 1px,
-    transparent 1px,
-    transparent 50px
+    #4CA8E0 0px,
+    #4CA8E0 2px,
+    transparent 2px,
+    transparent 4px
   );
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 50%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 50%, black 40%, transparent 100%);
+  opacity: 0.65;
 }
 
-/* Clip Trim Handles */
-.trim-handle {
-  width: 8px;
-  opacity: 0;
-  transition: opacity 0.15s ease, background 0.15s ease;
-}
-.group:hover .trim-handle {
-  opacity: 1;
-}
-
-/* Blade Cursor */
-.cursor-blade {
-  cursor: crosshair;
+.fcp-waveform-pattern-sfx {
+  background-image: repeating-linear-gradient(
+    90deg,
+    #3AC5D1 0px,
+    #3AC5D1 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 50%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 50%, black 40%, transparent 100%);
+  opacity: 0.65;
 }
 
-/* Scrubbable Number Indicator */
-.scrubby-input {
-  cursor: ew-resize;
-  user-select: none;
-}
-.scrubby-input:active {
-  color: #0A84FF;
-}
-
-/* Rotary Jog Wheel */
-.fcp-jog-wheel {
-  background: radial-gradient(circle, #25252D 0%, #17171C 100%);
-  border: 1px solid #33333E;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.6);
+/* Recessed Black LCD Dashboard */
+.fcp-lcd-panel {
+  background-color: #0A0A0C;
+  border: 1px solid #323236;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.08);
 }

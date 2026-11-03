@@ -7,66 +7,46 @@ export default {
   theme: {
     extend: {
       colors: {
-        obsidian: {
-          950: '#07080C',
-          900: '#0C0E15',
-          800: '#11131A',
-          700: '#181B26',
-          600: '#222634',
-          500: '#32374A',
-        },
-        // Apple Final Cut Pro "Anodized Dark" Calibrated Palette
+        // Exact Apple Final Cut Pro (macOS) Calibrated Palette
         fcp: {
-          bg: '#0B0B0D',
-          surface: '#161619',
-          surfaceElevated: '#1C1C21',
-          surfaceHover: '#24242A',
-          border: '#242429',
-          borderSpecular: 'rgba(255, 255, 255, 0.08)',
-          accent: '#0A84FF', // Apple Pro Blue
-          amber: '#FF9F0A',  // Final Cut Pro Iconic Amber Selection
-          skimmer: '#FF453A', // Live Skimmer Red
-          playhead: '#FFFFFF', // Parked Playhead White
-          emerald: '#30D158', // Pro Audio Green
-          textPrimary: '#F2F2F7',
-          textSecondary: '#8E8E93',
-          textMuted: '#636366',
-        },
-        electric: {
-          cyan: '#00F2FE',
-          violet: '#8A2BE2',
-          purple: '#7928CA',
-          magenta: '#FF007A',
-          emerald: '#10B981',
-          amber: '#F59E0B',
+          chrome: '#1E1E20',       // Panels, headers, inspectors, sidebars
+          timelineWell: '#161618', // Timeline container background
+          storylineSpine: '#0D0D0F', // Primary Storyline recessed spine
+          toolbar: '#222225',      // Middle center dashboard toolbar
+          lcdBg: '#0A0A0C',        // Recessed LCD timecode display
+          divider: '#000000',      // 1px black structural panel divider
+          dividerHighlight: 'rgba(255, 255, 255, 0.07)', // 1px top bevel highlight
+          selection: '#F5A623',    // Exact Final Cut Pro yellow/amber clip selection
+          accent: '#0A84FF',       // Apple Pro Blue (active toggles, key icons)
+          skimmer: '#FF453A',      // Hover skimmer red line
+          playhead: '#FFFFFF',     // Parked playhead white line
+          greenAudio: '#30D158',   // Audio meter green
+          amberAudio: '#FF9F0A',   // Audio meter amber
+          redAudio: '#FF453A',     // Audio meter red peak
+          
+          // Official FCP Role Colors
+          roleVideo: '#2B5B9E',       // Primary & Connected Video body
+          roleVideoHeader: '#1D3F70', // Video clip header bar
+          roleTitle: '#6E4594',       // Titles role body
+          roleTitleHeader: '#4D2E6B', // Titles header bar
+          roleDialogue: '#266894',    // Dialogue audio role
+          roleDialogueWave: '#4CA8E0',// Dialogue cyan waveform
+          roleMusic: '#217346',       // Music audio role
+          roleMusicWave: '#42B874',   // Music bright green waveform
+          roleSfx: '#1B7A82',         // Effects audio role
+          roleSfxWave: '#3AC5D1',     // Effects aqua waveform
+          roleGap: '#2A2A2D',         // Gap clip dark slate
         },
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
-        display: ['Syne', 'Plus Jakarta Sans', 'sans-serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'SF Pro Display', 'Inter', 'Helvetica Neue', 'sans-serif'],
+        mono: ['JetBrains Mono', 'SF Mono', 'ui-monospace', 'Menlo', 'monospace'],
       },
       boxShadow: {
-        'fcp-selection': '0 0 10px rgba(255, 159, 10, 0.45), inset 0 0 4px rgba(255, 159, 10, 0.3)',
+        'fcp-selected': '0 0 0 2px #F5A623, 0 0 10px rgba(245, 166, 35, 0.45)',
+        'fcp-lcd': 'inset 0 1px 3px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.08)',
         'fcp-panel': '0 4px 20px rgba(0, 0, 0, 0.65)',
-        'glass-glow': '0 0 35px -5px rgba(0, 242, 254, 0.15)',
-        'violet-glow': '0 0 35px -5px rgba(138, 43, 226, 0.2)',
-        'subtle-glow': '0 4px 24px -2px rgba(0, 0, 0, 0.5)',
       },
-      borderColor: {
-        hairline: 'rgba(255, 255, 255, 0.08)',
-        'hairline-bright': 'rgba(255, 255, 255, 0.16)',
-        'fcp-specular': 'rgba(255, 255, 255, 0.08)',
-      },
-      backgroundImage: {
-        'gradient-electric': 'linear-gradient(135deg, #00F2FE 0%, #8A2BE2 100%)',
-        'gradient-cinema': 'radial-gradient(ellipse at 50% -20%, rgba(138, 43, 226, 0.15) 0%, rgba(7, 8, 12, 0) 70%)',
-        'gradient-surface': 'linear-gradient(180deg, rgba(24, 27, 38, 0.6) 0%, rgba(17, 19, 26, 0.8) 100%)',
-      },
-      animation: {
-        'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow-spin': 'spin 12s linear infinite',
-      }
     },
   },
   plugins: [],

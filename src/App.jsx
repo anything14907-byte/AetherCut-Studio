@@ -1,37 +1,28 @@
 import React from 'react';
 import { useStudio } from './context/StudioContext';
-import Navbar from './components/common/Navbar';
-import LandingView from './components/landing/LandingView';
 import StudioWorkspace from './components/studio/StudioWorkspace';
-import ExportModal from './components/common/ExportModal';
 import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
 import SpotlightCommandHud from './components/common/SpotlightCommandHud';
 import { CheckCircle2 } from 'lucide-react';
 
 export default function App() {
-  const { activeView, toastMessage } = useStudio();
+  const { toastMessage } = useStudio();
 
   return (
-    <div className="min-h-screen bg-[#0B0B0D] text-slate-100 flex flex-col font-sans selection:bg-[#0A84FF]/25 selection:text-[#0A84FF] overflow-hidden">
-      {/* Top Universal Navbar */}
-      <Navbar />
+    <div className="h-screen w-screen bg-[#1E1E20] text-[#ECECEE] flex flex-col font-sans selection:bg-[#0A84FF]/25 selection:text-[#0A84FF] overflow-hidden">
+      {/* 1:1 Apple Final Cut Pro (macOS) Professional Workstation */}
+      <StudioWorkspace />
 
-      {/* View Switcher: Showcase Landing vs Studio Workspace */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {activeView === 'landing' ? <LandingView /> : <StudioWorkspace />}
-      </div>
-
-      {/* Global Modals & Spotlight Command HUD */}
+      {/* Global Pro Modals */}
       <SpotlightCommandHud />
-      <ExportModal />
       <KeyboardShortcutsModal />
 
-      {/* Toast Notification Pill */}
+      {/* Subtle macOS Notification Pill */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <div className="px-4 py-2.5 rounded-xl bg-[#161619]/95 border border-[#0A84FF]/40 text-slate-100 text-xs shadow-2xl backdrop-blur-md flex items-center space-x-2.5">
-            <CheckCircle2 className="w-4 h-4 text-[#0A84FF] shrink-0" />
-            <span className="font-medium font-sans">{toastMessage}</span>
+        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-150 pointer-events-none">
+          <div className="px-3.5 py-2 rounded-lg bg-[#18181A]/95 border border-[#3A3A40] text-white text-xs shadow-2xl backdrop-blur-md flex items-center space-x-2">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#0A84FF] shrink-0" />
+            <span className="font-medium">{toastMessage}</span>
           </div>
         </div>
       )}
