@@ -15,13 +15,25 @@ import { renderCompositorFrame } from '../services/canvasRenderer';
 const StudioContext = createContext(null);
 
 export function StudioProvider({ children }) {
+  // Check URL query parameters: e.g. ?v=demo or ?v=space or ?v=studio
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const initialVParam = urlParams ? urlParams.get('v') : null;
+
   // Load saved project or fall back to rich demo project
   const [project, setProjectState] = useState(() => {
+    if (initialVParam === 'space') {
+      return aiDirectorEngine.generateProceduralProject('Deep space cosmic journey with ambient drone and minimal cinema titles', '16:9');
+    } else if (initialVParam === 'shorts' || initialVParam === 'tiktok') {
+      return aiDirectorEngine.generateProceduralProject('Viral vertical hook with Hormozi kinetic captions', '9:16');
+    }
     const saved = projectStorage.loadFromLocalStorage();
     return saved || DEFAULT_DEMO_PROJECT;
   });
 
-  const [activeView, setActiveView] = useState('landing'); // 'landing' | 'studio'
+  const [activeView, setActiveView] = useState(() => {
+    // If ?v= query param is provided, open Studio directly!
+    return initialVParam ? 'studio' : 'landing';
+  });
   const [currentTime, setCurrentTimeState] = useState(0.0);
   const [isPlaying, setIsPlayingState] = useState(false);
   const [selectedClipId, setSelectedClipId] = useState(null);

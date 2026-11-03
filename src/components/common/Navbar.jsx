@@ -138,6 +138,21 @@ export default function Navbar() {
           <Key className="w-4 h-4" />
         </button>
 
+        {/* Share Direct Video Link (?v=demo) */}
+        <button
+          onClick={() => {
+            const shareUrl = `https://anything14907-byte.github.io/AetherCut-Studio/?v=demo`;
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(shareUrl);
+            }
+            showToast('Copied direct link: ' + shareUrl);
+          }}
+          title="Share Direct Video Link (?v=demo)"
+          className="p-2 rounded-lg text-slate-400 hover:text-[#00F2FE] hover:bg-white/[0.06] transition-colors border border-transparent hover:border-white/[0.08]"
+        >
+          <Share2 className="w-4 h-4" />
+        </button>
+
         {/* Shortcuts Cheat Sheet */}
         <button
           onClick={() => setIsShortcutsModalOpen(true)}
