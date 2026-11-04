@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useStudio } from '../../../context/StudioContext';
 import FcpColorBoard from './FcpColorBoard';
 import ColorWheelsInspector from './ColorWheelsInspector';
-import { FCP_ROLES, BLEND_MODES, AUDIO_EQ_PRESETS, formatSmpteTimecode } from '../../../types/studioTypes';
+import { FCP_ROLES, BLEND_MODES, AUDIO_EQ_PRESETS, LUT_PRESETS, formatSmpteTimecode } from '../../../types/studioTypes';
 import {
   Film,
   Disc,
@@ -293,6 +293,67 @@ export default function FcpInspector() {
                 </div>
               </div>
             )}
+
+            {/* 15+ Cinematic LUT Presets Ribbon with Intensity Slider (Available in all Color sub-modes) */}
+            <div className="bg-[#1C1C1F] p-2.5 rounded border border-[#2D2D31] space-y-2">
+              <div className="flex items-center justify-between pb-1 border-b border-[#2D2D31]">
+                <div className="flex items-center space-x-1.5">
+                  <Check className="w-3.5 h-3.5 text-[#0A84FF]" />
+                  <span className="font-semibold text-xs">Cinematic 3D LUT Presets</span>
+                </div>
+                <span className="text-[10px] font-mono text-[#FF9F0A]">16 Looks</span>
+              </div>
+
+              {/* Intensity Slider if a LUT is active */}
+              {selectedClip.colorFilter?.lutPreset && selectedClip.colorFilter?.lutPreset !== 'none' && (
+                <div className="space-y-1 bg-[#151517] p-2 rounded border border-[#28282D]">
+                  <div className="flex justify-between text-[11px] text-[#A1A1A6]">
+                    <span>LUT Intensity</span>
+                    <span className="font-mono text-white">{selectedClip.colorFilter?.lutIntensity ?? 100}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={selectedClip.colorFilter?.lutIntensity ?? 100}
+                    onChange={(e) => updateClip(selectedClip.id, {
+                      colorFilter: {
+                        ...(selectedClip.colorFilter || {}),
+                        lutIntensity: parseInt(e.target.value, 10)
+                      }
+                    })}
+                    className="w-full accent-[#0A84FF]"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto pr-0.5 pt-1">
+                {LUT_PRESETS.map((lut) => {
+                  const isCurrent = (selectedClip.colorFilter?.lutPreset || 'none') === lut.id;
+                  return (
+                    <button
+                      key={lut.id}
+                      onClick={() => updateClip(selectedClip.id, {
+                        colorFilter: {
+                          ...(selectedClip.colorFilter || {}),
+                          lutPreset: lut.id,
+                          lutIntensity: selectedClip.colorFilter?.lutIntensity ?? 100
+                        }
+                      })}
+                      title={lut.name}
+                      className={`px-2 py-1.5 rounded text-[10px] font-mono truncate text-left transition-all ${
+                        isCurrent
+                          ? 'bg-[#0A84FF] text-white font-bold shadow-sm'
+                          : 'bg-[#151517] text-[#A1A1A6] hover:text-white hover:bg-[#25252A] border border-[#28282D]'
+                      }`}
+                    >
+                      {lut.name.replace(/^(None \(|Hollywood |Kodak |Fujifilm |Sunset |Wes Anderson |Action )/, '').replace(/\)$/, '')}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
 

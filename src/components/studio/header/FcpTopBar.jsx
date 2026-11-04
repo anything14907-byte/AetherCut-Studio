@@ -29,6 +29,7 @@ export default function FcpTopBar() {
     setShowInspector,
     setIsShareModalOpen,
     setIsKeywordsModalOpen,
+    setIsImportModalOpen,
     appendClip,
     showToast
   } = useStudio();
@@ -112,13 +113,12 @@ export default function FcpTopBar() {
 
         {/* Import Media Button (Cmd+I) */}
         <button
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => setIsImportModalOpen(true)}
           title="Import Media (Cmd+I)"
-          className="p-1 rounded-[4px] text-[#A1A1A6] hover:text-white hover:bg-[#2A2A2E] transition-colors flex items-center"
+          className="px-2 py-0.5 rounded-[4px] text-[#ECECEE] hover:text-white bg-[#151517] border border-[#2D2D31] hover:bg-[#2A2A2E] transition-colors flex items-center space-x-1 shadow-sm"
         >
-          <div className="w-4 h-4 rounded border border-[#48484E] flex items-center justify-center text-[10px]">
-            ↓
-          </div>
+          <Download className="w-3.5 h-3.5 text-[#0A84FF]" />
+          <span className="font-medium text-[11px] hidden sm:inline">Import</span>
         </button>
 
         {/* Keyword Editor (Cmd+K) */}

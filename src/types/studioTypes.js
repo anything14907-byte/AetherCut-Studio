@@ -74,11 +74,21 @@ export const PROCEDURAL_SCENES = [
 export const LUT_PRESETS = [
   { id: 'none', name: 'None (Rec.709 Standard)', filter: '' },
   { id: 'tealOrange', name: 'Hollywood Teal & Orange', filter: 'contrast(125%) saturate(135%) hue-rotate(-10deg)' },
-  { id: 'kodak2383', name: 'Kodak 2383 Film Print', filter: 'contrast(115%) saturate(110%) sepia(20%)' },
+  { id: 'kodak2383', name: 'Kodak 2383 35mm Print', filter: 'contrast(115%) saturate(110%) sepia(20%)' },
+  { id: 'fujiVelvia', name: 'Fujifilm Velvia 50', filter: 'contrast(130%) saturate(145%) brightness(102%)' },
   { id: 'noir', name: 'Arri Monochrome Noir', filter: 'grayscale(100%) contrast(150%)' },
-  { id: 'goldenHour', name: 'Golden Hour Glow', filter: 'sepia(35%) saturate(140%) brightness(105%)' },
+  { id: 'goldenHour', name: 'Sunset Golden Hour', filter: 'sepia(35%) saturate(140%) brightness(105%)' },
   { id: 'cyberpunk', name: 'Cyberpunk Neon', filter: 'hue-rotate(90deg) saturate(180%) contrast(120%)' },
-  { id: 'fujiChrome', name: 'Fuji Astia Chrome', filter: 'saturate(125%) contrast(110%)' }
+  { id: 'fujiChrome', name: 'Fuji Astia Chrome', filter: 'saturate(125%) contrast(110%)' },
+  { id: 'bleachBypass', name: '90s Bleach Bypass', filter: 'contrast(160%) saturate(60%) brightness(95%)' },
+  { id: 'vintage70s', name: 'Super 8 Warm Vintage', filter: 'sepia(45%) contrast(110%) saturate(90%) hue-rotate(-5deg)' },
+  { id: 'technicolor', name: 'Technicolor 3-Strip', filter: 'saturate(170%) contrast(130%)' },
+  { id: 'cinematicCool', name: 'Nordic Frost Cool', filter: 'hue-rotate(190deg) saturate(90%) contrast(115%)' },
+  { id: 'monochromeContrast', name: 'Ansel Adams High B&W', filter: 'grayscale(100%) contrast(180%) brightness(90%)' },
+  { id: 'warmEktachrome', name: 'Kodak Ektachrome Vivid', filter: 'contrast(120%) saturate(135%) brightness(104%)' },
+  { id: 'pastelCinema', name: 'Wes Anderson Pastel', filter: 'saturate(85%) contrast(95%) brightness(110%) sepia(15%)' },
+  { id: 'blockbusterAction', name: 'Action Blockbuster Punch', filter: 'contrast(140%) saturate(125%) brightness(98%)' },
+  { id: 'sciFiMatrix', name: 'Sci-Fi Terminal Matrix', filter: 'hue-rotate(75deg) saturate(130%) contrast(125%)' }
 ];
 
 export const FCP_EFFECT_CATEGORIES = [

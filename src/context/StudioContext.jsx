@@ -100,6 +100,7 @@ export function StudioProvider({ children }) {
   const [onScreenControlMode, setOnScreenControlMode] = useState('transform'); // 'transform' | 'crop' | 'distort'
 
   // Modals & Panels
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
@@ -459,6 +460,55 @@ export function StudioProvider({ children }) {
     showToast(`Applied Retiming: ${speedConfig.speed || 1}x`);
   }, [selectedClipId, setProject, showToast]);
 
+  // Compound Clip (Alt+G)
+  const createCompoundClip = useCallback((clipId) => {
+    const targetId = clipId || selectedClipId;
+    if (!targetId) {
+      showToast('Select a clip to create Compound Clip (⌥G)');
+      return;
+    }
+
+    setProject((prev) => ({
+      ...prev,
+      clips: prev.clips.map((c) => {
+        if (c.id === targetId) {
+          return {
+            ...c,
+            name: `${c.name} [Compound]`,
+            isCompound: true,
+            role: 'video'
+          };
+        }
+        return c;
+      })
+    }));
+    showToast('Created Compound Clip (⌥G)');
+  }, [selectedClipId, setProject, showToast]);
+
+  // Audition Cycle (Key Y)
+  const cycleAudition = useCallback((clipId) => {
+    const targetId = clipId || selectedClipId;
+    if (!targetId) return;
+
+    setProject((prev) => ({
+      ...prev,
+      clips: prev.clips.map((c) => {
+        if (c.id === targetId && c.auditions && c.auditions.length > 1) {
+          const nextIndex = ((c.activeAuditionIndex || 0) + 1) % c.auditions.length;
+          const nextTake = c.auditions[nextIndex];
+          showToast(`Audition: Switched to Take ${nextIndex + 1}/${c.auditions.length} (Y)`);
+          return {
+            ...c,
+            activeAuditionIndex: nextIndex,
+            sceneType: nextTake.sceneType || c.sceneType,
+            name: `${c.name.split(' (Take')[0]} (Take ${nextIndex + 1})`
+          };
+        }
+        return c;
+      })
+    }));
+  }, [selectedClipId, setProject, showToast]);
+
   // Markers (Key M)
   const addMarker = useCallback((time = currentTimeRef.current, label = "Marker") => {
     const rounded = Math.round(time * 100) / 100;
@@ -604,6 +654,48 @@ export function StudioProvider({ children }) {
       if ((e.metaKey || e.ctrlKey) && e.code === 'KeyE') {
         e.preventDefault();
         setIsShareModalOpen(true);
+        return;
+      }
+
+      // Import Media (Cmd+I or Ctrl+I)
+      if ((e.metaKey || e.ctrlKey) && e.code === 'KeyI') {
+        e.preventDefault();
+        setIsImportModalOpen(true);
+        return;
+      }
+
+      // Toggle Video Scopes (Cmd+7 or Ctrl+7)
+      if ((e.metaKey || e.ctrlKey) && (e.code === 'Digit7' || e.key === '7')) {
+        e.preventDefault();
+        setShowScopes((prev) => !prev);
+        return;
+      }
+
+      // Toggle Inspector (Cmd+4 or Ctrl+4)
+      if ((e.metaKey || e.ctrlKey) && (e.code === 'Digit4' || e.key === '4')) {
+        e.preventDefault();
+        setShowInspector((prev) => !prev);
+        return;
+      }
+
+      // Compound Clip (Alt+G)
+      if (e.altKey && e.code === 'KeyG') {
+        e.preventDefault();
+        createCompoundClip();
+        return;
+      }
+
+      // Audition Take Swap (Y)
+      if (e.code === 'KeyY' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        cycleAudition();
+        return;
+      }
+
+      // Keyboard Shortcuts Cheat Sheet (?)
+      if (e.key === '?' || (e.shiftKey && e.code === 'Slash')) {
+        e.preventDefault();
+        setIsShortcutsModalOpen((prev) => !prev);
         return;
       }
 
@@ -900,6 +992,8 @@ export function StudioProvider({ children }) {
     clipStyle,
     setClipStyle,
     // Modals
+    isImportModalOpen,
+    setIsImportModalOpen,
     isShareModalOpen,
     setIsShareModalOpen,
     isSpotlightOpen,
@@ -908,6 +1002,8 @@ export function StudioProvider({ children }) {
     setIsShortcutsModalOpen,
     isKeywordsModalOpen,
     setIsKeywordsModalOpen,
+    createCompoundClip,
+    cycleAudition,
     startVideoExport,
     exportProgress,
     toastMessage,

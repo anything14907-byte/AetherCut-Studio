@@ -230,25 +230,55 @@ export default function ColorWheelsInspector({ clip, onUpdate }) {
         />
       </div>
 
-      {/* 1-Click Hollywood LUT Cards */}
-      <div className="space-y-1.5 pt-2 border-t border-[#242429]">
-        <label className="text-[10px] text-slate-400 font-mono uppercase font-bold">
-          Cinema LUT Profiles
-        </label>
-        <div className="grid grid-cols-3 gap-1.5">
-          {LUT_PRESETS.map((lut) => (
-            <button
-              key={lut.id}
-              onClick={() => updateF('lutPreset', lut.id)}
-              className={`px-2 py-1.5 rounded-lg text-[10px] font-mono truncate transition-all ${
-                f.lutPreset === lut.id
-                  ? 'bg-[#0A84FF] text-white font-bold shadow-sm'
-                  : 'bg-[#1C1C21] text-slate-400 hover:text-white border border-white/[0.04]'
-              }`}
-            >
-              {lut.label.split(' ')[0]}
-            </button>
-          ))}
+      {/* 1-Click Hollywood LUT Cards & Intensity */}
+      <div className="space-y-2 pt-2 border-t border-[#242429]">
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] text-slate-300 font-mono uppercase font-bold flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-[#FF9F0A]" />
+            <span>15+ Cinema LUT Profiles</span>
+          </label>
+          <span className="text-[10px] font-mono text-[#0A84FF]">
+            {f.lutPreset !== 'none' ? LUT_PRESETS.find(p => p.id === f.lutPreset)?.name || f.lutPreset : 'Rec.709'}
+          </span>
+        </div>
+
+        {/* LUT Intensity Slider */}
+        {f.lutPreset && f.lutPreset !== 'none' && (
+          <div className="space-y-1 p-2 rounded-lg bg-[#151518] border border-[#26262B]">
+            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+              <span>LUT Intensity</span>
+              <span className="text-white font-bold">{f.lutIntensity ?? 100}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value={f.lutIntensity ?? 100}
+              onChange={(e) => updateF('lutIntensity', parseInt(e.target.value, 10))}
+              className="w-full accent-[#0A84FF] h-1.5 bg-[#25252A] rounded cursor-pointer"
+            />
+          </div>
+        )}
+
+        <div className="grid grid-cols-3 gap-1.5 max-h-48 overflow-y-auto pr-0.5">
+          {LUT_PRESETS.map((lut) => {
+            const isSelected = f.lutPreset === lut.id;
+            return (
+              <button
+                key={lut.id}
+                onClick={() => updateF('lutPreset', lut.id)}
+                title={lut.name}
+                className={`px-1.5 py-1.5 rounded-md text-[10px] font-mono truncate transition-all text-left ${
+                  isSelected
+                    ? 'bg-[#0A84FF] text-white font-bold shadow-sm ring-1 ring-[#0A84FF]'
+                    : 'bg-[#1C1C21] text-slate-400 hover:text-white border border-white/[0.04] hover:bg-[#25252A]'
+                }`}
+              >
+                {lut.name.replace(/^(None \(|Hollywood |Kodak |Fujifilm |Sunset |Wes Anderson |Action )/, '').replace(/\)$/, '')}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -33,6 +33,7 @@ export default function FcpTimeline() {
     isSkimmingEnabled,
     isSnapping,
     setClipSpeed,
+    cycleAudition,
     markers,
     jumpToMarker,
     showTimelineIndex,
@@ -342,7 +343,7 @@ export default function FcpTimeline() {
                         <div
                           onClick={(e) => {
                             e.stopPropagation();
-                            setActiveAuditionClipId(activeAuditionClipId === clip.id ? null : clip.id);
+                            cycleAudition(clip.id);
                           }}
                           title="Click to cycle Audition alternative takes (Y)"
                           className="px-1.5 py-0.2 rounded bg-black/75 border border-[#F5A623] text-[#F5A623] text-[8px] font-mono font-bold flex items-center space-x-1 cursor-pointer hover:bg-[#F5A623] hover:text-black transition-colors"

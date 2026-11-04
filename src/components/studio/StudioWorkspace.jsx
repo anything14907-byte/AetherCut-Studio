@@ -8,6 +8,7 @@ import CenterDashboardToolbar from './toolbar/CenterDashboardToolbar';
 import FcpTimeline from './timeline/FcpTimeline';
 import FcpShareModal from './modals/FcpShareModal';
 import FcpKeywordsModal from './modals/FcpKeywordsModal';
+import ImportMediaModal from './modals/ImportMediaModal';
 
 export default function StudioWorkspace() {
   const {
@@ -46,6 +47,7 @@ export default function StudioWorkspace() {
       {/* MODALS */}
       <FcpShareModal />
       <FcpKeywordsModal />
+      <ImportMediaModal />
     </div>
   );
 }

@@ -47,6 +47,9 @@ export default function SpotlightCommandHud() {
     insertClip,
     connectClip,
     overwriteClip,
+    setIsImportModalOpen,
+    createCompoundClip,
+    cycleAudition,
     setIsKeywordsModalOpen,
     setIsShortcutsModalOpen,
     showToast
@@ -195,6 +198,30 @@ export default function SpotlightCommandHud() {
         setPlaybackQuality(next);
         showToast(next === 'proxy' ? 'Proxy Mode: 540p (High Performance)' : 'Proxy Mode: 1080p HD (Full Quality)');
       }
+    },
+    {
+      id: 'import',
+      title: 'Import Media (Local Files, Stock, Mattes)',
+      desc: 'Open macOS Import Media dialog with drag-and-drop & color mattes',
+      icon: PlusSquare,
+      shortcut: '⌘I',
+      action: () => setIsImportModalOpen(true)
+    },
+    {
+      id: 'compound',
+      title: 'New Compound Clip',
+      desc: 'Wrap selected clips into a nested compound clip container',
+      icon: Layers,
+      shortcut: '⌥G',
+      action: () => createCompoundClip()
+    },
+    {
+      id: 'audition',
+      title: 'Audition: Cycle Alternate Take',
+      desc: 'Cycle through alternate takes stacked on the active audition clip',
+      icon: Layers,
+      shortcut: 'Y',
+      action: () => cycleAudition()
     },
     {
       id: 'magnetic',
